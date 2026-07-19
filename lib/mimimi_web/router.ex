@@ -9,6 +9,7 @@ defmodule MimimiWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug MimimiWeb.Plugs.UserSession
+    plug MimimiWeb.Plugs.Locale
   end
 
   pipeline :api do
@@ -29,7 +30,10 @@ defmodule MimimiWeb.Router do
     get "/game/:game_id/join", GameController, :join_game
     get "/game/leave", GameController, :leave_game
 
-    live_session :default, on_mount: MimimiWeb.ActiveGamesHook do
+    # UI language switch (M3): sets the ui_locale cookie and redirects back.
+    get "/locale/:locale", LocaleController, :update
+
+    live_session :default, on_mount: [MimimiWeb.ActiveGamesHook, MimimiWeb.LocaleHook] do
       live "/", HomeLive.Index, :index
       live "/dashboard/:id", DashboardLive.Show, :show
       live "/games/:id/current", GameLive.Play, :play

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang={assigns[:ui_locale] || "de"}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,6 +13,9 @@
   </head>
   <body>
     {@inner_content}
-    <MimimiWeb.Layouts.footer active_games={Map.get(assigns, :active_games, 0)} />
+    <MimimiWeb.Layouts.footer
+      active_games={Map.get(assigns, :active_games, 0)}
+      ui_locale={assigns[:ui_locale] || "de"}
+    />
   </body>
 </html>

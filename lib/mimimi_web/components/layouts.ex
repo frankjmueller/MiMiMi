@@ -104,6 +104,29 @@ defmodule MimimiWeb.Layouts do
   """
   attr :active_games, :integer, default: 0
 
+  # One language-switcher link — bold (non-link) for the active locale, a link to switch for the other.
+  attr :locale, :string, required: true
+  attr :current, :string, default: "de"
+  attr :label, :string, required: true
+
+  defp locale_link(assigns) do
+    ~H"""
+    <%= if @locale == @current do %>
+      <span class="font-bold text-gray-700 dark:text-gray-200" aria-current="true">{@label}</span>
+    <% else %>
+      <.link
+        href={~p"/locale/#{@locale}"}
+        class="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+      >
+        {@label}
+      </.link>
+    <% end %>
+    """
+  end
+
+  attr :active_games, :integer, default: 0
+  attr :ui_locale, :string, default: "de"
+
   def footer(assigns) do
     ~H"""
     <footer class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-t border-gray-200/50 dark:border-gray-700/50 px-4 py-4 mt-8">
@@ -120,8 +143,14 @@ defmodule MimimiWeb.Layouts do
               rel="noopener noreferrer"
               class="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors duration-200"
             >
-              Impressum
+              {gettext("Impressum")}
             </a>
+            <div class="hidden sm:block text-gray-300 dark:text-gray-600">•</div>
+            <div class="flex items-center gap-1" aria-label={gettext("Sprache")}>
+              <.locale_link locale="de" current={@ui_locale} label="DE" />
+              <span class="text-gray-300 dark:text-gray-600">/</span>
+              <.locale_link locale="en" current={@ui_locale} label="EN" />
+            </div>
           </div>
 
           <div class="flex items-center gap-3">
