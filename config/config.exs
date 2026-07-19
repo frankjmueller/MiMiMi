@@ -26,6 +26,13 @@ config :mimimi, MimimiWeb.Endpoint,
   pubsub_server: Mimimi.PubSub,
   live_view: [signing_salt: "yxCPVIgH"]
 
+# Gettext (M3, ADR 0075): the UI is bilingual de+en. The source strings are German (msgids), so "de"
+# needs no translation file; English lives in priv/gettext/en. UI language (chrome) is separate from the
+# game's content language (M2) — a German class can play English words while reading a German UI.
+config :mimimi, MimimiWeb.Gettext,
+  default_locale: "de",
+  locales: ~w(de en)
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails
