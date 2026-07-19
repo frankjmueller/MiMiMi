@@ -1,129 +1,120 @@
 defmodule Mimimi.WortSchuleTest do
-  use ExUnit.Case, async: true
+  @moduledoc """
+  The WortSchule context now reads the ourwords delivery schema (ADR 0075) — the `mimimi.words` and
+  `mimimi.keywords` views — instead of the old flat wort.schule `words` table with its self-referential
+  keyword join and its per-word image HTTP call. Keyword ids are sense_relation ids (a namespace of
+  their own, NOT word ids); image_url is a relative path the game prepends its asset base to; labels and
+  lemmas pass through verbatim (HR2). These tests run against the M0 fixture rebuild — no external DB.
+  """
+  use Mimimi.DataCase, async: false
 
-  @moduletag :external_db
-
-  alias Mimimi.WortSchuleRepo
   alias Mimimi.WortSchule
+  alias Mimimi.OurwordsFixtures
 
-  describe "database connection" do
-    test "can query the wort_schule database" do
-      # This test verifies the connection works
-      # It will only pass if the wortschule_development database exists
-      result = WortSchuleRepo.query("SELECT 1 AS test")
-      assert {:ok, %Postgrex.Result{}} = result
-    end
+  setup do
+    OurwordsFixtures.insert_language("deu", autonym: "Deutsch")
+    OurwordsFixtures.insert_language("eng", autonym: "English")
+    :ok
   end
 
-  describe "list_words/1" do
-    test "returns a list of words" do
-      # This will return an empty list if no words exist, or a list of words
-      words = WortSchule.list_words(limit: 5)
-      assert is_list(words)
+  describe "get_word_ids_with_keywords_and_images/1" do
+    test "returns words that have an image and at least min_keywords keywords" do
+      OurwordsFixtures.insert_word(id: 1, language_iso: "deu", name: "Schaf")
+      OurwordsFixtures.insert_keywords(1, "deu", ["Wolle", "Weide", "blökt"])
+      OurwordsFixtures.insert_word(id: 2, language_iso: "deu", name: "Hund")
+      OurwordsFixtures.insert_keywords(2, "deu", ["bellt"])
+      OurwordsFixtures.insert_word(id: 3, language_iso: "deu", name: "Bild-los", image_url: nil)
+      OurwordsFixtures.insert_keywords(3, "deu", ["a", "b", "c"])
+
+      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 3) == [1]
+      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1) |> Enum.sort() == [1, 2]
     end
 
-    test "can filter by type" do
-      words = WortSchule.list_words(type: "Noun", limit: 5)
-      assert is_list(words)
-      # All returned words should be nouns
-      Enum.each(words, fn word ->
-        assert word.type == "Noun"
-      end)
-    end
-  end
+    test "filters by word type" do
+      OurwordsFixtures.insert_word(id: 1, language_iso: "deu", name: "Schaf", type: "Noun")
+      OurwordsFixtures.insert_keywords(1, "deu", ["Wolle"])
+      OurwordsFixtures.insert_word(id: 2, language_iso: "deu", name: "laufen", type: "Verb")
+      OurwordsFixtures.insert_keywords(2, "deu", ["rennen"])
 
-  describe "search_words/1" do
-    test "returns a list of matching words" do
-      words = WortSchule.search_words("test")
-      assert is_list(words)
+      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, types: ["Noun"]) == [1]
     end
-  end
 
-  describe "get_word/1" do
-    test "returns nil for non-existent word" do
-      # Use a very high ID that likely doesn't exist
-      assert WortSchule.get_word(999_999_999) == nil
+    test "filters by language — a game is language-pure" do
+      OurwordsFixtures.insert_word(id: 1, language_iso: "deu", name: "Schaf")
+      OurwordsFixtures.insert_keywords(1, "deu", ["Wolle"])
+      OurwordsFixtures.insert_word(id: 2, language_iso: "eng", name: "sheep")
+      OurwordsFixtures.insert_keywords(2, "eng", ["wool"])
+
+      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, language: "deu") == [1]
+      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, language: "eng") == [2]
     end
   end
 
   describe "get_complete_word/1" do
-    test "returns error tuple for non-existent word" do
-      assert {:error, :not_found} = WortSchule.get_complete_word(999_999_999)
+    test "returns keywords keyed by their sense_relation id, with the label as the name" do
+      OurwordsFixtures.insert_word(id: 1, language_iso: "deu", name: "Schaf")
+      [wolle_id, weide_id] = OurwordsFixtures.insert_keywords(1, "deu", ["Wolle", "Weide"])
+
+      assert {:ok, word} = WortSchule.get_complete_word(1)
+      assert word.id == 1
+      assert word.name == "Schaf"
+
+      assert Enum.sort_by(word.keywords, & &1.id) ==
+               Enum.sort_by(
+                 [%{id: wolle_id, name: "Wolle"}, %{id: weide_id, name: "Weide"}],
+                 & &1.id
+               )
     end
 
-    test "returns direct image URLs from wort.schule" do
-      # Get a word that should have an image
-      word_ids = WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1)
+    test "prepends the configured asset base url to the relative image path" do
+      Application.put_env(:mimimi, :ourwords_asset_base_url, "https://ourwords.example")
+      on_exit(fn -> Application.delete_env(:mimimi, :ourwords_asset_base_url) end)
 
-      if length(word_ids) > 0 do
-        word_id = Enum.at(word_ids, 0)
-        {:ok, word} = WortSchule.get_complete_word(word_id)
+      OurwordsFixtures.insert_word(id: 1, language_iso: "deu", name: "Schaf",
+        image_url: "/rails/active_storage/blobs/abc.png")
+      OurwordsFixtures.insert_keywords(1, "deu", ["Wolle"])
 
-        # If the word has an image, verify it's a direct URL from wort.schule
-        if word.image_url do
-          assert String.starts_with?(word.image_url, "https://wort.schule/"),
-                 "Image URL should be a direct URL from wort.schule, got: #{word.image_url}"
-        end
-      end
+      assert {:ok, word} = WortSchule.get_complete_word(1)
+      assert word.image_url == "https://ourwords.example/rails/active_storage/blobs/abc.png"
+    end
+
+    test "an unknown word is {:error, :not_found}" do
+      assert WortSchule.get_complete_word(999) == {:error, :not_found}
+    end
+
+    test "lemma and labels survive verbatim — diacritics and click letters (HR2)" do
+      OurwordsFixtures.insert_word(id: 7, language_iso: "deu", name: "Fußball")
+      OurwordsFixtures.insert_keyword(keyword_id: 71, word_id: 7, name: "ǀgôas", language_iso: "deu")
+
+      assert {:ok, word} = WortSchule.get_complete_word(7)
+      assert word.name == "Fußball"
+      assert [%{name: "ǀgôas"}] = word.keywords
     end
   end
 
-  describe "get_word_ids_with_keywords_and_images/1" do
-    test "filters words by minimum number of keywords" do
-      # Get all words with at least 1 keyword
-      all_word_ids = WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1)
+  describe "get_keywords_batch/1" do
+    test "resolves keyword ids (sense_relation ids) to their labels" do
+      OurwordsFixtures.insert_word(id: 1, language_iso: "deu", name: "Schaf")
+      [wolle_id, weide_id] = OurwordsFixtures.insert_keywords(1, "deu", ["Wolle", "Weide"])
 
-      # Get words with at least 3 keywords
-      filtered_word_ids = WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 3)
+      batch = WortSchule.get_keywords_batch([wolle_id, weide_id])
+      assert batch[wolle_id].name == "Wolle"
+      assert batch[weide_id].name == "Weide"
+    end
 
-      # The filtered list should be a subset of all words
-      assert is_list(all_word_ids)
-      assert is_list(filtered_word_ids)
-      assert length(filtered_word_ids) <= length(all_word_ids)
-
-      # Verify each word in the filtered list actually has at least 3 keywords
-      Enum.each(filtered_word_ids, fn word_id ->
-        {:ok, word} = WortSchule.get_complete_word(word_id)
-        keyword_count = length(word.keywords)
-
-        assert keyword_count >= 3,
-               "Word '#{word.name}' (ID: #{word_id}) has only #{keyword_count} keywords, but should have at least 3"
-      end)
+    test "an empty list yields an empty map" do
+      assert WortSchule.get_keywords_batch([]) == %{}
     end
   end
 
   describe "get_max_keywords_count/0" do
-    test "returns the maximum number of keywords for any word with an image" do
-      max_count = WortSchule.get_max_keywords_count()
+    test "is the largest keyword count among words that have an image" do
+      OurwordsFixtures.insert_word(id: 1, language_iso: "deu", name: "Schaf")
+      OurwordsFixtures.insert_keywords(1, "deu", ["a", "b", "c", "d"])
+      OurwordsFixtures.insert_word(id: 2, language_iso: "deu", name: "Hund")
+      OurwordsFixtures.insert_keywords(2, "deu", ["x"])
 
-      # Should return a non-negative integer
-      assert is_integer(max_count)
-      assert max_count >= 0
-
-      # If we have words with images, max should be at least 1
-      word_ids = WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1)
-
-      if length(word_ids) > 0 do
-        assert max_count >= 1
-      end
-    end
-
-    test "max count is accurate by verifying against actual word data" do
-      max_count = WortSchule.get_max_keywords_count()
-
-      # Get a sample of words with images
-      word_ids = WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1)
-
-      if length(word_ids) > 0 do
-        # Check that no word has more keywords than the max
-        Enum.each(Enum.take(word_ids, 10), fn word_id ->
-          {:ok, word} = WortSchule.get_complete_word(word_id)
-          keyword_count = length(word.keywords)
-
-          assert keyword_count <= max_count,
-                 "Word '#{word.name}' has #{keyword_count} keywords, but max is #{max_count}"
-        end)
-      end
+      assert WortSchule.get_max_keywords_count() == 4
     end
   end
 end
