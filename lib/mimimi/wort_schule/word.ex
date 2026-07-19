@@ -1,31 +1,24 @@
 defmodule Mimimi.WortSchule.Word do
   @moduledoc """
-  Schema for accessing words from the wort.schule database.
-  This is a read-only schema for an external database.
+  A playable word from the ourwords delivery view `mimimi.words` (ADR 0075) — read-only. One row per
+  published word that has a non-offensive meaning; the id is the stable public word id (source_entry_id).
+  `image_url` is a relative ActiveStorage path the game prepends its asset base to. Keywords are a
+  separate namespace (sense_relation ids), joined via `mimimi.keywords` — NOT the old self-referential
+  word-to-word join. Text passes through verbatim (HR2): never normalize name here.
   """
   use Ecto.Schema
 
-  @primary_key {:id, :id, autogenerate: true}
-  @timestamps_opts [inserted_at: :created_at, updated_at: :updated_at]
+  @schema_prefix "mimimi"
+  @primary_key {:id, :id, autogenerate: false}
   schema "words" do
+    field :language_iso, :string
     field :name, :string
     field :slug, :string
     field :type, :string
     field :meaning, :string
-    field :meaning_long, :string
-    field :syllables, :string
-    field :example_sentences, {:array, :string}
-    field :hit_counter, :integer
-    field :prototype, :boolean
-    field :foreign, :boolean
-    field :compound, :boolean
-    field :with_tts, :boolean
+    field :image_url, :string
+    field :direction, :string
 
-    timestamps()
-
-    # Many-to-many self-referential association for keywords
-    many_to_many :keywords, __MODULE__,
-      join_through: "keywords",
-      join_keys: [word_id: :id, keyword_id: :id]
+    has_many :keywords, Mimimi.WortSchule.Keyword, foreign_key: :word_id, references: :id
   end
 end

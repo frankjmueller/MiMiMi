@@ -50,7 +50,14 @@ defmodule Mimimi.OurwordsSchemaContractTest do
     OurwordsFixtures.insert_keywords(1, "deu", ["Wolle", "Weide", "blökt"])
     OurwordsFixtures.insert_word(id: 2, language_iso: "deu", name: "Hund", type: "Noun")
     OurwordsFixtures.insert_keywords(2, "deu", ["bellt"])
-    OurwordsFixtures.insert_word(id: 3, language_iso: "deu", name: "leer", type: "Adjective", image_url: nil)
+
+    OurwordsFixtures.insert_word(
+      id: 3,
+      language_iso: "deu",
+      name: "leer",
+      type: "Adjective",
+      image_url: nil
+    )
 
     %{rows: [[min1, min3, nouns]]} =
       Mimimi.WortSchuleRepo.query!(

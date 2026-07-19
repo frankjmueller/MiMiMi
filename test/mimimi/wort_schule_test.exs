@@ -27,7 +27,11 @@ defmodule Mimimi.WortSchuleTest do
       OurwordsFixtures.insert_keywords(3, "deu", ["a", "b", "c"])
 
       assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 3) == [1]
-      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1) |> Enum.sort() == [1, 2]
+
+      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1) |> Enum.sort() == [
+               1,
+               2
+             ]
     end
 
     test "filters by word type" do
@@ -36,7 +40,8 @@ defmodule Mimimi.WortSchuleTest do
       OurwordsFixtures.insert_word(id: 2, language_iso: "deu", name: "laufen", type: "Verb")
       OurwordsFixtures.insert_keywords(2, "deu", ["rennen"])
 
-      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, types: ["Noun"]) == [1]
+      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, types: ["Noun"]) ==
+               [1]
     end
 
     test "filters by language — a game is language-pure" do
@@ -45,8 +50,11 @@ defmodule Mimimi.WortSchuleTest do
       OurwordsFixtures.insert_word(id: 2, language_iso: "eng", name: "sheep")
       OurwordsFixtures.insert_keywords(2, "eng", ["wool"])
 
-      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, language: "deu") == [1]
-      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, language: "eng") == [2]
+      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, language: "deu") ==
+               [1]
+
+      assert WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, language: "eng") ==
+               [2]
     end
   end
 
@@ -70,8 +78,13 @@ defmodule Mimimi.WortSchuleTest do
       Application.put_env(:mimimi, :ourwords_asset_base_url, "https://ourwords.example")
       on_exit(fn -> Application.delete_env(:mimimi, :ourwords_asset_base_url) end)
 
-      OurwordsFixtures.insert_word(id: 1, language_iso: "deu", name: "Schaf",
-        image_url: "/rails/active_storage/blobs/abc.png")
+      OurwordsFixtures.insert_word(
+        id: 1,
+        language_iso: "deu",
+        name: "Schaf",
+        image_url: "/rails/active_storage/blobs/abc.png"
+      )
+
       OurwordsFixtures.insert_keywords(1, "deu", ["Wolle"])
 
       assert {:ok, word} = WortSchule.get_complete_word(1)
@@ -84,7 +97,13 @@ defmodule Mimimi.WortSchuleTest do
 
     test "lemma and labels survive verbatim — diacritics and click letters (HR2)" do
       OurwordsFixtures.insert_word(id: 7, language_iso: "deu", name: "Fußball")
-      OurwordsFixtures.insert_keyword(keyword_id: 71, word_id: 7, name: "ǀgôas", language_iso: "deu")
+
+      OurwordsFixtures.insert_keyword(
+        keyword_id: 71,
+        word_id: 7,
+        name: "ǀgôas",
+        language_iso: "deu"
+      )
 
       assert {:ok, word} = WortSchule.get_complete_word(7)
       assert word.name == "Fußball"

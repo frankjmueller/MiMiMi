@@ -159,58 +159,47 @@ The faster you guess (fewer keywords needed), the more points you earn!
 - Prevents unauthorized users from hijacking the waiting room and starting games
 - Even with the same URL, attackers cannot impersonate the game host without the valid token
 
-## 🔗 WortSchule Integration
+## 🔗 ourwords Integration (delivery schema, ADR 0075)
 
-This application integrates with the [wort.schule](https://wort.schule) database for accessing German word data, keywords, and images.
+This application reads word, keyword and image data from **ourwords** through a dedicated Postgres
+schema `mimimi` — three read-only views (`mimimi.words`, `mimimi.keywords`, `mimimi.playable_languages`)
+plus one analytics table it writes to (`mimimi.keyword_effectiveness`). This replaces the older direct
+read of the flat wort.schule `words` table with its self-referential keyword join and its per-word image
+HTTP call. Key differences:
+
+- **Keyword ids are `sense_relation` ids** — a namespace of their own, never word ids. Resolve them with
+  `Mimimi.WortSchule.get_keywords_batch/1`, never via the words view.
+- **`image_url` is a relative path** carried by the view; the game prepends `OURWORDS_ASSET_BASE_URL`.
+  There is no image URL cache and no per-word image validation anymore — the view only serves words that
+  have an image.
+- The delivery views are **published-only by construction** (defined over the ourwords read-model), so a
+  draft can never reach the game.
 
 ### Configuration
 
-The app uses a dedicated read-only repository (`Mimimi.WortSchuleRepo`) for accessing the external wort.schule database:
+The read-only repository `Mimimi.WortSchuleRepo` points at the ourwords database via a dedicated
+SELECT-only role:
 
-**Development:**
-- Database: `wortschule_development`
-- Same PostgreSQL credentials as main app
+- `OURWORDS_DATABASE_URL` — the connection URL (with the `mimimi_game` role). For one release generation
+  the old `WORTSCHULE_DATABASE_URL` is still accepted as a fallback.
+- `OURWORDS_ASSET_BASE_URL` — the base URL prepended to the view's relative image paths (empty → paths
+  pass through unchanged).
 
-**Production:**
-- Database: `wortschule_production`
-- Username: `wortschule`
-- Password: Set via `WORTSCHULE_DATABASE_PASSWORD` environment variable
-- Host: `localhost` (configurable via `WORTSCHULE_DATABASE_HOST`)
+In test, `Mimimi.WortSchuleRepo` points at `mimimi_words_test`, a local fixture rebuild of the delivery
+schema (`test/support/fixtures/ourwords_mimimi_schema.sql`) — no external database, no network.
 
 ### Usage
 
 ```elixir
-# Get a complete word with keywords and image URL
+# A complete word: keywords keyed by sense_relation id, absolute image url
 {:ok, word} = Mimimi.WortSchule.get_complete_word(123)
-# => %{id: 123, name: "Affe", keywords: [...], image_url: "https://..."}
+# => %{id: 123, name: "Affe", keywords: [%{id: 456, name: "Tier"}], image_url: "https://…/rails/…"}
 
-# Search words
-words = Mimimi.WortSchule.search_words("Tier")
+# Resolve round keyword ids (sense_relation ids) to labels
+Mimimi.WortSchule.get_keywords_batch([456, 789])
 
-# List words with filters
-words = Mimimi.WortSchule.list_words(type: "Noun", limit: 10)
-
-# Get image URL (cached for 24 hours)
-url = Mimimi.WortSchule.get_image_url(word_id)
-```
-
-### Image URL Cache
-
-The application uses an in-memory ETS cache for WortSchule image URLs to minimize API calls:
-
-- **Cache Duration**: 24 hours
-- **Storage**: In-memory ETS table (no database overhead)
-- **Auto-cleanup**: Expired entries are removed every 6 hours
-- **Benefits**: Significantly reduces API calls and improves performance
-
-Cache management:
-```elixir
-# View cache statistics
-Mimimi.WortSchule.ImageUrlCache.stats()
-# => %{total: 150, expired: 5, active: 145}
-
-# Clear cache (if needed)
-Mimimi.WortSchule.ImageUrlCache.clear()
+# Playable-word ids for a language, filtered by image + keyword count + type
+Mimimi.WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 3, types: ["Noun"], language: "deu")
 ```
 
 ### Direct Image URLs

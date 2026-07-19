@@ -5,7 +5,7 @@ defmodule Mimimi.Games do
 
   import Ecto.Query, warn: false
   alias Mimimi.Repo
-  alias Mimimi.Games.{Game, GameInvite, Player, Round, Pick, Word, Keyword}
+  alias Mimimi.Games.{Game, GameInvite, Player, Round, Pick}
 
   # Constants
   @lobby_timeout_seconds 15 * 60
@@ -536,30 +536,17 @@ defmodule Mimimi.Games do
     target_word_ids_raw =
       WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 3, types: game.word_types)
 
-    Logger.info(
-      "Found #{length(target_word_ids_raw)} potential target words for game #{game.id} round #{position}"
-    )
-
-    # Validate that target words have actual image URLs from the API
-    target_word_ids = validate_word_images(target_word_ids_raw)
+    # The delivery view guarantees an image (ADR 0075) — no per-word HTTP check.
+    target_word_ids = target_word_ids_raw
 
     Logger.info(
-      "After image validation: #{length(target_word_ids)} valid target words for game #{game.id} round #{position}"
+      "Found #{length(target_word_ids)} target words for game #{game.id} round #{position}"
     )
 
-    all_word_ids_raw =
+    all_word_ids =
       WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, types: game.word_types)
 
-    Logger.info(
-      "Found #{length(all_word_ids_raw)} potential words for game #{game.id} round #{position}"
-    )
-
-    # Validate that all words have actual image URLs from the API
-    all_word_ids = validate_word_images(all_word_ids_raw)
-
-    Logger.info(
-      "After image validation: #{length(all_word_ids)} valid words for game #{game.id} round #{position}"
-    )
+    Logger.info("Found #{length(all_word_ids)} words for game #{game.id} round #{position}")
 
     # Get already used target words from existing rounds to ensure uniqueness
     used_target_word_ids =
@@ -814,45 +801,13 @@ defmodule Mimimi.Games do
   # Round functions
 
   @doc """
-  Validates that words have valid image URLs from the external API.
-  Returns only the word IDs that have actual image URLs available.
-  This filters out words where the database says there's an image but the API doesn't return one.
-
-  ## Examples
-
-      iex> Games.validate_word_images([123, 456, 789])
-      [123, 789]  # 456 had no valid image URL
-  """
-  def validate_word_images([]), do: []
-
-  def validate_word_images(word_ids) when is_list(word_ids) do
-    alias Mimimi.WortSchule.ImageHelper
-
-    # Validate images in parallel for performance
-    word_ids
-    |> Task.async_stream(
-      fn word_id ->
-        url = ImageHelper.image_url_for_word(word_id)
-        {word_id, url != nil and is_binary(url) and url != ""}
-      end,
-      timeout: :infinity,
-      max_concurrency: 10
-    )
-    |> Enum.reduce([], fn
-      {:ok, {word_id, true}}, acc -> [word_id | acc]
-      _, acc -> acc
-    end)
-    |> Enum.reverse()
-  end
-
-  @doc """
-  Validates that all keywords for a word have valid names.
-  Returns true if all keywords have non-empty names.
+  Validates that all keywords resolve to a non-empty label in the delivery view.
+  Returns true if every keyword id maps to a keyword with a non-empty name.
   """
   def validate_keywords([]), do: false
 
   def validate_keywords(keyword_ids) when is_list(keyword_ids) do
-    keywords_map = Mimimi.WortSchule.get_words_batch(keyword_ids)
+    keywords_map = Mimimi.WortSchule.get_keywords_batch(keyword_ids)
 
     Enum.all?(keyword_ids, fn keyword_id ->
       keyword = Map.get(keywords_map, keyword_id)
@@ -874,14 +829,11 @@ defmodule Mimimi.Games do
     target_word_ids_raw =
       WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 3, types: game.word_types)
 
-    Logger.info("Found #{length(target_word_ids_raw)} potential target words for game #{game.id}")
+    # The delivery view guarantees an image (image_url present is a WHERE clause) — no per-word HTTP
+    # check needed anymore (ADR 0075).
+    target_word_ids = target_word_ids_raw
 
-    # Validate that target words have actual image URLs from the API
-    target_word_ids = validate_word_images(target_word_ids_raw)
-
-    Logger.info(
-      "After image validation: #{length(target_word_ids)} valid target words for game #{game.id}"
-    )
+    Logger.info("Found #{length(target_word_ids)} target words for game #{game.id}")
 
     if length(target_word_ids) < game.rounds_count do
       raise "Nicht genügend Wörter mit gültigen Bildern verfügbar. Benötigt: #{game.rounds_count}, Verfügbar: #{length(target_word_ids)}. Wortarten: #{Enum.join(game.word_types, ", ")}"
@@ -891,16 +843,9 @@ defmodule Mimimi.Games do
     all_word_ids_raw =
       WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, types: game.word_types)
 
-    Logger.info(
-      "Found #{length(all_word_ids_raw)} potential distractor words for game #{game.id}"
-    )
+    all_word_ids = all_word_ids_raw
 
-    # Validate that distractor words have actual image URLs from the API
-    all_word_ids = validate_word_images(all_word_ids_raw)
-
-    Logger.info(
-      "After image validation: #{length(all_word_ids)} valid distractor words for game #{game.id}"
-    )
+    Logger.info("Found #{length(all_word_ids)} distractor words for game #{game.id}")
 
     required_distractors = game.rounds_count * (game.grid_size - 1)
 
@@ -1090,31 +1035,7 @@ defmodule Mimimi.Games do
     max(1, 6 - ceil(keywords_shown / total_keywords * 5))
   end
 
-  # Word and Keyword functions
-
-  @doc """
-  Gets a word by ID with preloaded keywords.
-  """
-  def get_word_with_keywords(word_id) do
-    Repo.get(Word, word_id)
-    |> Repo.preload(:keywords)
-  end
-
-  @doc """
-  Gets words by IDs.
-  """
-  def get_words_by_ids(word_ids) do
-    from(w in Word, where: w.id in ^word_ids)
-    |> Repo.all()
-  end
-
-  @doc """
-  Gets keywords by IDs.
-  """
-  def get_keywords_by_ids(keyword_ids) do
-    from(k in Keyword, where: k.id in ^keyword_ids)
-    |> Repo.all()
-  end
+  # Word and Keyword display functions
 
   @doc """
   Fetches words for display from WortSchule, handling missing data gracefully.
@@ -1158,7 +1079,7 @@ defmodule Mimimi.Games do
   def fetch_keywords_for_display(keyword_ids) when is_list(keyword_ids) do
     alias Mimimi.WortSchule
 
-    keywords_map = WortSchule.get_words_batch(keyword_ids)
+    keywords_map = WortSchule.get_keywords_batch(keyword_ids)
 
     Enum.map(keyword_ids, fn keyword_id ->
       case Map.get(keywords_map, keyword_id) do

@@ -10,18 +10,19 @@ defmodule Mimimi.Analytics do
   alias Mimimi.Analytics.KeywordEffectiveness
 
   @doc """
-  Records keyword effectiveness data for a player's pick.
-
-  Creates one record per keyword that was visible when the player made their guess.
+  Records keyword effectiveness data for a player's pick into the ourwords-owned
+  `mimimi.keyword_effectiveness` table (ADR 0075). One row per keyword that was visible when the player
+  guessed. The row is PII-free; keyword_id is a sense_relation id.
 
   ## Parameters
 
-    - `round_id` - UUID of the round
-    - `pick_id` - UUID of the pick
-    - `word_id` - WortSchule ID of the target word
-    - `keywords_with_timestamps` - List of `{keyword_id, position, revealed_at}` tuples
-    - `picked_at` - DateTime when player made their guess
-    - `is_correct` - Whether the guess was correct
+    - `round_id` - game-round-opaque UUID of the round
+    - `pick_id` - game-round-opaque UUID of the pick
+    - `word_id` - ourwords public id of the target word
+    - `language_iso` - the round's language (iso_639_3, e.g. `"deu"`)
+    - `keywords_with_timestamps` - list of `{keyword_id, position, revealed_at}` tuples
+    - `picked_at` - DateTime when the player guessed
+    - `is_correct` - whether the guess was correct
 
   ## Example
 
@@ -29,6 +30,7 @@ defmodule Mimimi.Analytics do
         round_id,
         pick_id,
         word_id,
+        "deu",
         [{123, 1, ~U[2024-01-01 12:00:00Z]}, {456, 2, ~U[2024-01-01 12:00:10Z]}],
         ~U[2024-01-01 12:00:15Z],
         true
@@ -38,25 +40,28 @@ defmodule Mimimi.Analytics do
         round_id,
         pick_id,
         word_id,
+        language_iso,
         keywords_with_timestamps,
         picked_at,
         is_correct
       ) do
     now = DateTime.utc_now()
 
+    # No `id`: the ourwords table has a bigserial primary key that Postgres fills. `created_at` is the
+    # table's own timestamp column (INSERT-only, no updated_at).
     records =
       Enum.map(keywords_with_timestamps, fn {keyword_id, position, revealed_at} ->
         %{
-          id: Ecto.UUID.generate(),
           word_id: word_id,
           keyword_id: keyword_id,
+          language_iso: language_iso,
           pick_id: pick_id,
           round_id: round_id,
           keyword_position: position,
           revealed_at: revealed_at,
           picked_at: picked_at,
           led_to_correct: is_correct,
-          inserted_at: now
+          created_at: now
         }
       end)
 
@@ -107,12 +112,12 @@ defmodule Mimimi.Analytics do
     query = """
     WITH max_positions AS (
       SELECT round_id, MAX(keyword_position) as max_pos
-      FROM keyword_effectiveness
+      FROM mimimi.keyword_effectiveness
       GROUP BY round_id
     ),
     final_keyword_picks AS (
       SELECT ke.word_id, ke.led_to_correct
-      FROM keyword_effectiveness ke
+      FROM mimimi.keyword_effectiveness ke
       JOIN max_positions mp ON ke.round_id = mp.round_id
         AND ke.keyword_position = mp.max_pos
     )

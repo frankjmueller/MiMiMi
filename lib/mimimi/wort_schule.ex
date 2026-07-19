@@ -1,27 +1,19 @@
 defmodule Mimimi.WortSchule do
   @moduledoc """
-  Context module for accessing wort.schule data.
-  Provides a clean interface for querying words, keywords, and images.
+  Context for reading the ourwords delivery schema (ADR 0075): the read-only views `mimimi.words` and
+  `mimimi.keywords`. Words carry a relative `image_url` (the game prepends its asset base — no per-word
+  HTTP call anymore); keywords are a separate id namespace (sense_relation ids). Everything here is
+  read-only and language-aware. Text passes through verbatim (HR2).
   """
   import Ecto.Query
   alias Mimimi.WortSchuleRepo, as: Repo
-  alias Mimimi.WortSchule.{Word, ImageHelper}
+  alias Mimimi.WortSchule.Word
+  # Aliased as KeywordView so it does not shadow Elixir's stdlib `Keyword` (used for opts below).
+  alias Mimimi.WortSchule.Keyword, as: KeywordView
 
   @doc """
-  Get complete word data: id, name, keywords, and image URL.
-
-  ## Examples
-
-      iex> WortSchule.get_complete_word(123)
-      {:ok, %{
-        id: 123,
-        name: "Affe",
-        keywords: [%{id: 456, name: "Tier"}],
-        image_url: "https://wort.schule/rails/active_storage/blobs/redirect/..."
-      }}
-
-      iex> WortSchule.get_complete_word(99999)
-      {:error, :not_found}
+  Get complete word data: id, name, keywords (as `%{id: sense_relation_id, name: label}`), and the
+  absolute image URL. Returns `{:error, :not_found}` for an unknown id.
   """
   def get_complete_word(word_id) do
     case get_word_with_keywords(word_id) do
@@ -30,254 +22,129 @@ defmodule Mimimi.WortSchule do
     end
   end
 
-  @doc """
-  Get complete word data for multiple words in a single batch query.
-  Much faster than calling get_complete_word/1 in a loop.
-
-  ## Examples
-
-      iex> WortSchule.get_complete_words_batch([123, 456])
-      %{
-        123 => %{id: 123, name: "Affe", keywords: [...], image_url: "..."},
-        456 => %{id: 456, name: "Baum", keywords: [...], image_url: "..."}
-      }
-
-      iex> WortSchule.get_complete_words_batch([])
-      %{}
-  """
+  @doc "Batch variant of `get_complete_word/1`, returning a map of `word_id => complete word data`."
   def get_complete_words_batch([]), do: %{}
 
   def get_complete_words_batch(word_ids) when is_list(word_ids) do
     from(w in Word,
       where: w.id in ^word_ids,
-      preload: [keywords: ^from(k in Word, order_by: k.name)]
+      preload: [keywords: ^from(k in KeywordView, order_by: k.name)]
     )
     |> Repo.all()
     |> Enum.map(fn word -> {word.id, format_word(word)} end)
     |> Enum.into(%{})
   end
 
-  @doc """
-  Get word by ID.
-  """
-  def get_word(id) do
-    Repo.get(Word, id)
-  end
+  @doc "Get a word by id (no keywords)."
+  def get_word(id), do: Repo.get(Word, id)
 
-  @doc """
-  Get multiple words by IDs in a single batch query.
-  Returns a map of word_id => word struct.
+  @doc "Get a word by slug."
+  def get_word_by_slug(slug), do: Repo.get_by(Word, slug: slug)
 
-  ## Examples
-
-      iex> WortSchule.get_words_batch([123, 456])
-      %{123 => %Word{id: 123, name: "Affe"}, 456 => %Word{id: 456, name: "Baum"}}
-  """
-  def get_words_batch([]), do: %{}
-
-  def get_words_batch(word_ids) when is_list(word_ids) do
-    from(w in Word, where: w.id in ^word_ids)
-    |> Repo.all()
-    |> Enum.map(fn word -> {word.id, word} end)
-    |> Enum.into(%{})
-  end
-
-  @doc """
-  Get word by slug.
-  """
-  def get_word_by_slug(slug) do
-    Repo.get_by(Word, slug: slug)
-  end
-
-  @doc """
-  Get word with keywords preloaded.
-  """
+  @doc "Get a word with its keywords preloaded (ordered by label)."
   def get_word_with_keywords(id) do
     from(w in Word,
       where: w.id == ^id,
-      preload: [keywords: ^from(k in Word, order_by: k.name)]
+      preload: [keywords: ^from(k in KeywordView, order_by: k.name)]
     )
     |> Repo.one()
   end
 
   @doc """
-  Search words by name.
-
-  ## Examples
-
-      iex> WortSchule.search_words("Affe")
-      [%Word{name: "Affe", ...}]
+  Resolve keyword ids (sense_relation ids) to `%{keyword_id => %{id:, name:}}`. This is the correct
+  lookup for round keyword_ids — they are NOT word ids and must never be resolved via the words view.
   """
-  def search_words(search_term) do
-    pattern = "%#{search_term}%"
+  def get_keywords_batch([]), do: %{}
 
-    from(w in Word,
-      where: ilike(w.name, ^pattern),
-      order_by: w.name,
-      limit: 20
-    )
+  def get_keywords_batch(keyword_ids) when is_list(keyword_ids) do
+    from(k in KeywordView, where: k.keyword_id in ^keyword_ids)
     |> Repo.all()
+    |> Enum.map(fn keyword ->
+      {keyword.keyword_id, %{id: keyword.keyword_id, name: keyword.name}}
+    end)
+    |> Enum.into(%{})
   end
 
   @doc """
-  Get all words with images.
-  """
-  def get_words_with_images do
-    from(w in Word,
-      join: att in "active_storage_attachments",
-      on: att.record_id == w.id and att.record_type == "Word" and att.name == "image",
-      distinct: true,
-      order_by: w.name
-    )
-    |> Repo.all()
-  end
-
-  @doc """
-  Get all words that have at least one keyword and an image.
-  Returns formatted word data with keywords and image URL.
-  """
-  def get_words_with_keywords_and_images do
-    from(w in Word,
-      join: att in "active_storage_attachments",
-      on: att.record_id == w.id and att.record_type == "Word" and att.name == "image",
-      join: k in "keywords",
-      on: k.word_id == w.id,
-      distinct: true,
-      order_by: w.name,
-      preload: [keywords: ^from(kw in Word, order_by: kw.name)]
-    )
-    |> Repo.all()
-    |> Enum.map(&format_word/1)
-  end
-
-  @doc """
-  Get IDs of all words that have at least one keyword and an image.
-  This is a lightweight query that only fetches IDs for async processing.
+  Ids of all words that have an image and at least `:min_keywords` keywords, ordered by name.
 
   ## Options
 
-    * `:min_keywords` - Minimum number of keywords required (default: 1)
-    * `:types` - List of word types to filter by (e.g., ["Noun", "Verb"]) (default: all types)
-
-  ## Examples
-
-      iex> WortSchule.get_word_ids_with_keywords_and_images()
-      [123, 456, 789]
-
-      iex> WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 2)
-      [123, 789]
-
-      iex> WortSchule.get_word_ids_with_keywords_and_images(types: ["Noun"])
-      [123, 456]
+    * `:min_keywords` - minimum keyword count (default 1)
+    * `:types` - list of word types to include (e.g. `["Noun"]`); all types when omitted
+    * `:language` - restrict to one language (iso_639_3, e.g. `"deu"`); all languages when omitted
   """
   def get_word_ids_with_keywords_and_images(opts \\ []) do
-    try do
-      min_keywords = Keyword.get(opts, :min_keywords, 1)
-      types = Keyword.get(opts, :types)
+    min_keywords = Keyword.get(opts, :min_keywords, 1)
+    types = Keyword.get(opts, :types)
+    language = Keyword.get(opts, :language)
 
-      query =
-        from(w in Word,
-          join: att in "active_storage_attachments",
-          on: att.record_id == w.id and att.record_type == "Word" and att.name == "image",
-          join: k in "keywords",
-          on: k.word_id == w.id,
-          join: kw in Word,
-          on: kw.id == k.keyword_id,
-          group_by: [w.id, w.name],
-          having: count(k.keyword_id, :distinct) >= ^min_keywords,
-          order_by: w.name,
-          select: {w.id, w.name}
-        )
+    query =
+      from(w in Word,
+        join: k in KeywordView,
+        on: k.word_id == w.id,
+        where: not is_nil(w.image_url) and w.image_url != "",
+        group_by: [w.id, w.name],
+        having: count(k.keyword_id) >= ^min_keywords,
+        order_by: w.name,
+        select: {w.id, w.name}
+      )
 
-      query =
-        if types && types != [] do
-          from(w in query, where: w.type in ^types)
-        else
-          query
-        end
+    query = if types && types != [], do: from(w in query, where: w.type in ^types), else: query
+    query = if language, do: from(w in query, where: w.language_iso == ^language), else: query
 
-      query
-      |> Repo.all()
-      |> Enum.map(fn {id, _name} -> id end)
-    rescue
-      _error -> []
-    end
+    query
+    |> Repo.all()
+    |> Enum.map(fn {id, _name} -> id end)
   end
 
   @doc """
-  Get the maximum number of keywords for any word that has an image.
-  Returns 0 if no words with images exist.
-
-  ## Examples
-
-      iex> WortSchule.get_max_keywords_count()
-      15
-  """
-  def get_max_keywords_count do
-    try do
-      result =
-        from(w in Word,
-          join: att in "active_storage_attachments",
-          on: att.record_id == w.id and att.record_type == "Word" and att.name == "image",
-          join: k in "keywords",
-          on: k.word_id == w.id,
-          join: kw in Word,
-          on: kw.id == k.keyword_id,
-          group_by: w.id,
-          select: count(k.keyword_id, :distinct)
-        )
-        |> Repo.all()
-
-      case result do
-        [] -> 0
-        counts -> Enum.max(counts)
-      end
-    rescue
-      _error -> 1
-    end
-  end
-
-  @doc """
-  Check if a word has an image.
-  """
-  def word_has_image?(word_id) do
-    ImageHelper.has_image?(word_id)
-  end
-
-  @doc """
-  Get image URL for a word.
-  """
-  def get_image_url(word_id) do
-    ImageHelper.image_url_for_word(word_id)
-  end
-
-  @doc """
-  List all words with optional filters.
+  The largest keyword count among words that have an image (0 when there are none). Bounds the
+  „minimum keywords" slider in the word list.
 
   ## Options
 
-    * `:type` - Filter by word type (e.g., "Noun", "Verb")
-    * `:limit` - Limit results (default: 100)
-    * `:offset` - Offset for pagination (default: 0)
+    * `:language` - restrict to one language (iso_639_3); all languages when omitted
+  """
+  def get_max_keywords_count(opts \\ []) do
+    language = Keyword.get(opts, :language)
 
-  ## Examples
+    query =
+      from(w in Word,
+        join: k in KeywordView,
+        on: k.word_id == w.id,
+        where: not is_nil(w.image_url) and w.image_url != "",
+        group_by: w.id,
+        select: count(k.keyword_id)
+      )
 
-      iex> WortSchule.list_words(type: "Noun", limit: 10)
-      [%Word{}, ...]
+    query = if language, do: from(w in query, where: w.language_iso == ^language), else: query
+
+    case Repo.all(query) do
+      [] -> 0
+      counts -> Enum.max(counts)
+    end
+  end
+
+  @doc """
+  List words with optional filters.
+
+  ## Options
+
+    * `:type` - filter by word type
+    * `:language` - filter by language (iso_639_3)
+    * `:limit` - default 100
+    * `:offset` - default 0
   """
   def list_words(opts \\ []) do
     type = Keyword.get(opts, :type)
+    language = Keyword.get(opts, :language)
     limit = Keyword.get(opts, :limit, 100)
     offset = Keyword.get(opts, :offset, 0)
 
     query = from(w in Word, order_by: w.name)
-
-    query =
-      if type do
-        from(w in query, where: w.type == ^type)
-      else
-        query
-      end
+    query = if type, do: from(w in query, where: w.type == ^type), else: query
+    query = if language, do: from(w in query, where: w.language_iso == ^language), else: query
 
     query
     |> limit(^limit)
@@ -285,12 +152,23 @@ defmodule Mimimi.WortSchule do
     |> Repo.all()
   end
 
+  # Keywords are `%{id: sense_relation_id, name: label}`; image_url is the relative delivery path with
+  # the asset base prepended (empty base → path passes through unchanged).
   defp format_word(word) do
     %{
       id: word.id,
       name: word.name,
-      keywords: Enum.map(word.keywords, &%{id: &1.id, name: &1.name}),
-      image_url: ImageHelper.image_url_for_word(word.id)
+      keywords: Enum.map(word.keywords, &%{id: &1.keyword_id, name: &1.name}),
+      image_url: absolute_image_url(word.image_url)
     }
+  end
+
+  defp absolute_image_url(nil), do: nil
+
+  defp absolute_image_url(path) do
+    case Application.get_env(:mimimi, :ourwords_asset_base_url, "") do
+      "" -> path
+      base -> base <> path
+    end
   end
 end

@@ -969,11 +969,15 @@ defmodule MimimiWeb.GameLive.Play do
     if length(keyword_timestamps) > 0 do
       picked_at = DateTime.utc_now()
 
+      # M1 is German-only (iso_639_3 "deu"); M2 replaces this constant with round.language_iso.
+      language_iso = "deu"
+
       Task.start(fn ->
         Analytics.record_pick_effectiveness(
           round.id,
           pick_id,
           round.word_id,
+          language_iso,
           keyword_timestamps,
           picked_at,
           is_correct

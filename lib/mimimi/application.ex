@@ -28,8 +28,6 @@ defmodule Mimimi.Application do
       {Task.Supervisor, name: Mimimi.TaskSupervisor},
       # Background worker to cleanup timed-out lobbies
       Mimimi.GameCleanupWorker,
-      # WortSchule image URL cache (ETS-based, 24-hour TTL)
-      Mimimi.WortSchule.ImageUrlCache,
       # Start a worker by calling: Mimimi.Worker.start_link(arg)
       # {Mimimi.Worker, arg},
       # Start to serve requests, typically the last entry

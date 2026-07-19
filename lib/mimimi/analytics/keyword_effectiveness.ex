@@ -1,50 +1,48 @@
 defmodule Mimimi.Analytics.KeywordEffectiveness do
   @moduledoc """
-  Schema for tracking keyword effectiveness in helping players guess words.
-
-  Each record represents a single keyword that was visible when a player made a pick.
-  If a player saw 3 keywords before guessing, 3 records are created - one per keyword.
-
-  This data enables analysis of:
-  - Which keywords lead to fast/correct guesses
-  - Which keywords are ineffective or misleading
-  - Words that need better keywords
+  The ourwords-owned analytics table `mimimi.keyword_effectiveness` (ADR 0075) — the single surface the
+  game writes to. One row per keyword that was visible when a player made a pick. PII-free: no player,
+  session or device reference; the pick/round UUIDs are game-round-opaque. Owned and migrated by
+  ourwords/Rails; the game only INSERTs. `keyword_id` is a sense_relation id (not a word id).
   """
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :binary_id
+  @schema_prefix "mimimi"
 
   schema "keyword_effectiveness" do
-    # WortSchule integer IDs
+    # ourwords public ids (integers)
     field :word_id, :integer
     field :keyword_id, :integer
+    field :language_iso, :string
 
-    # MiMiMi UUIDs (not foreign keys since this is in a different database)
+    # game-round-opaque UUIDs (not foreign keys — this table lives in the ourwords database)
     field :pick_id, :binary_id
     field :round_id, :binary_id
 
-    # Order & Timing
+    # order & timing
     field :keyword_position, :integer
     field :revealed_at, :utc_datetime_usec
     field :picked_at, :utc_datetime_usec
 
-    # Outcome
+    # outcome
     field :led_to_correct, :boolean
 
-    timestamps(type: :utc_datetime_usec, updated_at: false)
+    # ourwords owns the table: it is `created_at`, INSERT-only (no updated_at).
+    field :created_at, :utc_datetime_usec
   end
 
   @required_fields [
     :word_id,
     :keyword_id,
+    :language_iso,
     :pick_id,
     :round_id,
     :keyword_position,
     :revealed_at,
     :picked_at,
-    :led_to_correct
+    :led_to_correct,
+    :created_at
   ]
 
   @doc false
@@ -52,6 +50,6 @@ defmodule Mimimi.Analytics.KeywordEffectiveness do
     keyword_effectiveness
     |> cast(attrs, @required_fields)
     |> validate_required(@required_fields)
-    |> validate_number(:keyword_position, greater_than: 0)
+    |> validate_inclusion(:keyword_position, 1..5)
   end
 end

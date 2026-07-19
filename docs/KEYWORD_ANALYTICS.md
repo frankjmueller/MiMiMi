@@ -1,6 +1,15 @@
 # Keyword Effectiveness Analytics
 
-This document describes the `keyword_effectiveness` table in the `wortschule_production` database and how to use it for analyzing and improving keyword quality.
+> **ADR 0075 (ourwords integration).** The analytics table now lives in the **ourwords** database as
+> `mimimi.keyword_effectiveness` (owned and migrated by ourwords/Rails; the game only INSERTs, through a
+> role granted SELECT+INSERT on that one table). Two things changed versus the old wort.schule table:
+> **`keyword_id` is now a `sense_relation` id** (not a word id), and a **`language_iso`** column records
+> the round's language. This is an epoch break — the old `keyword_effectiveness` rows in the wort.schule
+> database are frozen, not migrated, because the id semantics differ. The staff-facing analysis lives in
+> ourwords at `redaktion/stichwort-wirksamkeit`; the raw-SQL recipes below still apply, against the
+> `mimimi.keyword_effectiveness` table.
+
+This document describes the `keyword_effectiveness` table and how to use it for analyzing and improving keyword quality.
 
 ## How Data is Collected
 

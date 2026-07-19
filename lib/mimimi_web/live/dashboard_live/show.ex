@@ -206,20 +206,8 @@ defmodule MimimiWeb.DashboardLive.Show do
   end
 
   defp fetch_keywords(keyword_ids) do
-    alias Mimimi.WortSchule
-
-    # Batch fetch all keywords at once (much faster than N individual queries)
-    keywords_map = WortSchule.get_words_batch(keyword_ids)
-
-    Enum.map(keyword_ids, fn kw_id ->
-      case Map.get(keywords_map, kw_id) do
-        nil ->
-          %{id: kw_id, name: "?"}
-
-        keyword ->
-          %{id: keyword.id, name: keyword.name}
-      end
-    end)
+    # Keyword ids are sense_relation ids — resolve via the keywords view, not the words view.
+    Mimimi.Games.fetch_keywords_for_display(keyword_ids)
   end
 
   defp fetch_possible_words(word_ids) do

@@ -1,201 +1,86 @@
 defmodule Mimimi.Games.RoundValidationTest do
-  use Mimimi.DataCase, async: true
+  @moduledoc """
+  Round generation now draws from the ourwords delivery views (ADR 0075): the words pool is guaranteed
+  to have images (image_url is a WHERE clause in the view), so the old per-word image HTTP validation is
+  gone. Keywords are resolved via the keywords view (sense_relation ids), never the words view. These
+  tests run against the M0 fixtures — deterministic, no external DB, no network.
+  """
+  use Mimimi.DataCase, async: false
 
   alias Mimimi.{Accounts, Games}
-  alias Mimimi.WortSchule.ImageHelper
+  alias Mimimi.OurwordsFixtures
 
-  describe "round generation with image validation" do
-    @describetag :external_db
+  # Seed a pool large enough for a small game: nouns with an image, some with 3+ keywords (targets),
+  # all with at least one (distractors).
+  defp seed_pool do
+    OurwordsFixtures.insert_language("deu", autonym: "Deutsch")
 
+    for id <- 1..8 do
+      OurwordsFixtures.insert_word(id: id, language_iso: "deu", name: "Wort#{id}", type: "Noun")
+      OurwordsFixtures.insert_keywords(id, "deu", ["k#{id}a", "k#{id}b", "k#{id}c"])
+    end
+  end
+
+  describe "generate_rounds/1 against the delivery views" do
     setup do
-      {:ok, host_user} = Accounts.get_or_create_user_by_session("validation_test_host")
-      %{host_user: host_user}
+      {:ok, host} = Accounts.get_or_create_user_by_session("round_gen_host")
+      %{host: host}
     end
 
-    test "fails when there are not enough words with valid images", %{host_user: host_user} do
-      # Create a game with max rounds and a rare word type
-      # Adverbs likely have very few words with images
+    test "creates the requested rounds, each with an image-backed word and resolvable keywords",
+         %{host: host} do
+      seed_pool()
+
       {:ok, game} =
-        Games.create_game(host_user.id, %{
-          rounds_count: 20,
+        Games.create_game(host.id, %{
+          rounds_count: 2,
           clues_interval: 9,
-          grid_size: 9,
-          # Use Adverb which likely has few/no valid images
-          word_types: ["Adverb"]
+          grid_size: 4,
+          word_types: ["Noun"]
         })
 
-      # Starting the game should fail or set an error state
-      result = Games.start_game(game)
+      Games.generate_rounds(game)
 
-      # The game should either return an error or have rounds_generation_failed
-      case result do
-        {:ok, started_game} ->
-          # If it started, it should fail during round generation
-          # Wait a bit for async generation
-          :timer.sleep(500)
+      rounds =
+        Repo.all(
+          from(r in Games.Round, where: r.game_id == ^game.id, order_by: [asc: r.position])
+        )
 
-          # Check game state - should be in error or game_over
-          updated_game = Games.get_game(started_game.id)
-          assert updated_game.state in ["game_over", "error"]
+      assert length(rounds) == 2
 
-        {:error, _reason} ->
-          # Direct error is acceptable
-          assert true
-      end
+      Enum.each(rounds, fn round ->
+        # Every keyword id resolves to a non-empty label via the keywords view (not the words view).
+        assert length(round.keyword_ids) >= 3
+        keywords = Mimimi.WortSchule.get_keywords_batch(round.keyword_ids)
+
+        Enum.each(round.keyword_ids, fn kid ->
+          assert %{name: name} = Map.get(keywords, kid)
+          assert name not in [nil, ""]
+        end)
+
+        # The target word has an image in the words view.
+        assert {:ok, %{image_url: image_url}} = Mimimi.WortSchule.get_complete_word(round.word_id)
+        assert is_binary(image_url) and image_url != ""
+      end)
+    end
+  end
+
+  describe "insufficient data raises an informative error" do
+    setup do
+      {:ok, host} = Accounts.get_or_create_user_by_session("insufficient_host")
+      %{host: host}
     end
 
-    test "all generated rounds have valid image URLs", %{host_user: host_user} do
+    test "not enough target words", %{host: host} do
+      # No fixtures seeded → the pool is empty.
       {:ok, game} =
-        Games.create_game(host_user.id, %{
-          rounds_count: 3,
+        Games.create_game(host.id, %{
+          rounds_count: 20,
           clues_interval: 9,
           grid_size: 9,
           word_types: ["Noun"]
         })
 
-      # Generate rounds
-      Games.generate_rounds(game)
-
-      # Fetch all rounds
-      rounds =
-        Repo.all(
-          from(r in Games.Round,
-            where: r.game_id == ^game.id,
-            order_by: [asc: r.position]
-          )
-        )
-
-      assert length(rounds) == 3
-
-      # Check that all words in all rounds have valid image URLs
-      Enum.each(rounds, fn round ->
-        Enum.each(round.possible_words_ids, fn word_id ->
-          image_url = ImageHelper.image_url_for_word(word_id)
-
-          assert image_url != nil,
-                 "Word #{word_id} in round #{round.position} has no valid image URL"
-
-          assert is_binary(image_url) and image_url != "",
-                 "Word #{word_id} in round #{round.position} has invalid image URL: #{inspect(image_url)}"
-        end)
-      end)
-    end
-
-    test "all generated rounds have valid keywords", %{host_user: host_user} do
-      {:ok, game} =
-        Games.create_game(host_user.id, %{
-          rounds_count: 3,
-          clues_interval: 9,
-          grid_size: 9,
-          word_types: ["Noun"]
-        })
-
-      # Generate rounds
-      Games.generate_rounds(game)
-
-      # Fetch all rounds
-      rounds =
-        Repo.all(
-          from(r in Games.Round,
-            where: r.game_id == ^game.id,
-            order_by: [asc: r.position]
-          )
-        )
-
-      assert length(rounds) == 3
-
-      # Check that all keyword IDs are valid and have names
-      Enum.each(rounds, fn round ->
-        assert length(round.keyword_ids) >= 3,
-               "Round #{round.position} has fewer than 3 keywords: #{length(round.keyword_ids)}"
-
-        keywords_map = Mimimi.WortSchule.get_words_batch(round.keyword_ids)
-
-        Enum.each(round.keyword_ids, fn keyword_id ->
-          keyword = Map.get(keywords_map, keyword_id)
-
-          assert keyword != nil,
-                 "Keyword #{keyword_id} in round #{round.position} not found in database"
-
-          assert keyword.name != nil and keyword.name != "",
-                 "Keyword #{keyword_id} in round #{round.position} has no name"
-        end)
-      end)
-    end
-  end
-
-  describe "validate_word_images/1" do
-    @describetag :external_db
-
-    test "returns only words with valid image URLs" do
-      # Get some word IDs
-      word_ids =
-        Mimimi.WortSchule.get_word_ids_with_keywords_and_images(
-          min_keywords: 1,
-          types: ["Noun"]
-        )
-        |> Enum.take(10)
-
-      if word_ids == [] do
-        # Skip if no words available
-        assert true
-      else
-        # Validate images
-        valid_word_ids = Games.validate_word_images(word_ids)
-
-        # All returned word IDs should have valid image URLs
-        Enum.each(valid_word_ids, fn word_id ->
-          url = ImageHelper.image_url_for_word(word_id)
-          assert url != nil and is_binary(url) and url != ""
-        end)
-      end
-    end
-
-    test "filters out words without valid images" do
-      # This test verifies that validate_word_images actually filters
-      # We can't easily create test data, but we can verify the function exists
-      result = Games.validate_word_images([])
-      assert result == []
-    end
-  end
-
-  describe "insufficient data error handling" do
-    setup do
-      {:ok, host_user} = Accounts.get_or_create_user_by_session("error_test_host")
-      %{host_user: host_user}
-    end
-
-    test "raises informative error when not enough valid target words", %{host_user: host_user} do
-      # Test with max rounds and rare word type to trigger insufficient words error
-      {:ok, game} =
-        Games.create_game(host_user.id, %{
-          rounds_count: 20,
-          clues_interval: 9,
-          grid_size: 9,
-          # Other word type likely has very few words with 3+ keywords
-          word_types: ["Other"]
-        })
-
-      # This should raise an error about insufficient words
-      assert_raise RuntimeError, ~r/nicht genügend|not enough/i, fn ->
-        Games.generate_rounds(game)
-      end
-    end
-
-    test "raises informative error when not enough valid distractor words", %{
-      host_user: host_user
-    } do
-      # Test with large grid and rare word type
-      {:ok, game} =
-        Games.create_game(host_user.id, %{
-          rounds_count: 20,
-          clues_interval: 9,
-          # Max grid size with rare word type
-          grid_size: 16,
-          word_types: ["Other"]
-        })
-
-      # This should raise an error about insufficient words
       assert_raise RuntimeError, ~r/nicht genügend|not enough/i, fn ->
         Games.generate_rounds(game)
       end

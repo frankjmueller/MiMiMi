@@ -28,10 +28,14 @@ if config_env() == :prod do
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
-  wortschule_database_url =
-    System.get_env("WORTSCHULE_DATABASE_URL") ||
+  # The ourwords database, reached through the dedicated SELECT-only `mimimi_game` role (ADR 0075).
+  # OURWORDS_DATABASE_URL is the name going forward; WORTSCHULE_DATABASE_URL stays accepted for one
+  # release generation so the cutover deploy does not need a simultaneous ENV rename.
+  ourwords_database_url =
+    System.get_env("OURWORDS_DATABASE_URL") ||
+      System.get_env("WORTSCHULE_DATABASE_URL") ||
       raise """
-      environment variable WORTSCHULE_DATABASE_URL is missing.
+      environment variable OURWORDS_DATABASE_URL is missing.
       For example: ecto://USER:PASS@HOST/DATABASE
       """
 
@@ -45,13 +49,20 @@ if config_env() == :prod do
     # pool_count: 4,
     socket_options: maybe_ipv6
 
-  # Configure wort.schule database (read-only)
+  # The ourwords delivery schema (read-only views + the one analytics table), ADR 0075.
   config :mimimi, Mimimi.WortSchuleRepo,
-    url: wortschule_database_url,
-    pool_size: String.to_integer(System.get_env("WORTSCHULE_POOL_SIZE") || "10"),
+    url: ourwords_database_url,
+    pool_size:
+      String.to_integer(
+        System.get_env("OURWORDS_POOL_SIZE") || System.get_env("WORTSCHULE_POOL_SIZE") || "10"
+      ),
     queue_target: 50,
     queue_interval: 1000,
     socket_options: maybe_ipv6
+
+  # The base URL the game prepends to the delivery view's relative image_url paths (e.g.
+  # "https://sprachen.wort.schule"). Empty → paths pass through unchanged.
+  config :mimimi, :ourwords_asset_base_url, System.get_env("OURWORDS_ASSET_BASE_URL", "")
 
   # The secret key base is used to sign/encrypt cookies and other secrets.
   # A default value is used in config/dev.exs and config/test.exs but you
