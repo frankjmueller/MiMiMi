@@ -212,20 +212,19 @@ defmodule MimimiWeb.HomeLiveTest do
     test "displays word type selection checkboxes", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/")
 
-      # Check that all word type options are displayed
+      # The four delivery-view word types (ADR 0075) — „Other" was removed.
       assert has_element?(view, "#word-type-noun")
       assert has_element?(view, "#word-type-verb")
       assert has_element?(view, "#word-type-adjective")
       assert has_element?(view, "#word-type-adverb")
-      assert has_element?(view, "#word-type-other")
+      refute has_element?(view, "#word-type-other")
 
-      # Check that Noun is checked by default
       html = render(view)
       assert html =~ "Nomen"
       assert html =~ "Verb"
       assert html =~ "Adjektiv"
       assert html =~ "Adverb"
-      assert html =~ "Andere"
+      refute html =~ "Andere"
     end
 
     test "creates game with custom word types", %{conn: conn} do

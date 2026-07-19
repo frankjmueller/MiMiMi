@@ -152,6 +152,26 @@ defmodule Mimimi.WortSchule do
     |> Repo.all()
   end
 
+  @doc """
+  The languages that have at least one playable word (image + keywords), from `mimimi.playable_languages`.
+  Each is `%{language_iso, autonym, english_name, rtl, words_with_image_min1_kw, words_with_image_min3_kw,
+  noun_count, verb_count, adjective_count, adverb_count}`. The lobby offers only these.
+  """
+  def playable_languages do
+    %{columns: cols, rows: rows} =
+      Repo.query!("""
+      SELECT language_iso, autonym, english_name, rtl,
+             words_with_image_min1_kw, words_with_image_min3_kw,
+             noun_count, verb_count, adjective_count, adverb_count
+      FROM mimimi.playable_languages
+      WHERE words_with_image_min1_kw > 0
+      ORDER BY autonym
+      """)
+
+    keys = Enum.map(cols, &String.to_atom/1)
+    Enum.map(rows, fn row -> keys |> Enum.zip(row) |> Map.new() end)
+  end
+
   # Keywords are `%{id: sense_relation_id, name: label}`; image_url is the relative delivery path with
   # the asset base prepended (empty base → path passes through unchanged).
   defp format_word(word) do

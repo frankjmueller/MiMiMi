@@ -60,7 +60,9 @@ defmodule Mimimi.Games.LanguageTest do
       %{host: host}
     end
 
-    test "the round pool and rounds follow the game's language, not a hardcoded default", %{host: host} do
+    test "the round pool and rounds follow the game's language, not a hardcoded default", %{
+      host: host
+    } do
       seed_language("eng", "English", 8)
       # German words exist too, but an English game must stay English.
       seed_language("deu", "Deutsch", 8)
@@ -109,22 +111,35 @@ defmodule Mimimi.Games.LanguageTest do
   end
 
   describe "word type validation" do
-    setup do
-      {:ok, host} = Accounts.get_or_create_user_by_session("wordtype_host")
-      %{host: host}
+    test "the Other type is no longer accepted (view carries only Noun/Verb/Adjective/Adverb)" do
+      changeset =
+        Mimimi.Games.Game.changeset(%Mimimi.Games.Game{}, %{
+          rounds_count: 1,
+          clues_interval: 9,
+          grid_size: 4,
+          word_types: ["Other"],
+          language_iso: "deu",
+          host_user_id: Ecto.UUID.generate(),
+          host_token: "t"
+        })
+
+      refute changeset.valid?
+      assert %{word_types: [_ | _]} = errors_on(changeset)
     end
 
-    test "the Other type is no longer accepted (view carries only Noun/Verb/Adjective/Adverb)", %{host: host} do
-      assert {:error, changeset} =
-               Games.create_game(host.id, %{
-                 rounds_count: 1,
-                 clues_interval: 9,
-                 grid_size: 4,
-                 word_types: ["Other"],
-                 language_iso: "deu"
-               })
+    test "Noun/Verb/Adjective/Adverb are accepted" do
+      changeset =
+        Mimimi.Games.Game.changeset(%Mimimi.Games.Game{}, %{
+          rounds_count: 1,
+          clues_interval: 9,
+          grid_size: 4,
+          word_types: ["Noun", "Verb", "Adjective", "Adverb"],
+          language_iso: "deu",
+          host_user_id: Ecto.UUID.generate(),
+          host_token: "t"
+        })
 
-      assert %{word_types: [_ | _]} = errors_on(changeset)
+      assert changeset.valid?
     end
   end
 end

@@ -39,12 +39,15 @@ defmodule MimimiWeb.Plugs.UserSession do
     clues_interval = Map.get(conn.cookies, "game_clues_interval", "9")
     grid_size = Map.get(conn.cookies, "game_grid_size", "9")
 
+    # „Other" is no longer a valid word type (ADR 0075); defensively strip it from any old cookie value.
     word_types =
       case Map.get(conn.cookies, "game_word_types") do
-        nil -> ["Noun", "Verb", "Adjective", "Adverb", "Other"]
-        "" -> ["Noun", "Verb", "Adjective", "Adverb", "Other"]
+        blank when blank in [nil, ""] -> ["Noun", "Verb", "Adjective", "Adverb"]
         types_string -> String.split(types_string, ",", trim: true)
       end
+      |> Enum.reject(&(&1 == "Other"))
+
+    game_language = Map.get(conn.cookies, "game_language", "deu")
 
     conn
     |> put_session("show_markers", show_markers)
@@ -52,6 +55,7 @@ defmodule MimimiWeb.Plugs.UserSession do
     |> put_session("game_clues_interval", clues_interval)
     |> put_session("game_grid_size", grid_size)
     |> put_session("game_word_types", word_types)
+    |> put_session("game_language", game_language)
   end
 
   defp generate_session_id do

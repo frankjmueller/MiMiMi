@@ -16,6 +16,8 @@ defmodule Mimimi.Games.Round do
     field :possible_words_ids, {:array, :integer}, default: []
     field :position, :integer
     field :state, :string, default: "on_hold"
+    # Denormalized from the game so analytics and rendering need no game join (M2).
+    field :language_iso, :string, default: "deu"
 
     belongs_to :game, Mimimi.Games.Game
     has_many :picks, Mimimi.Games.Pick
@@ -26,7 +28,15 @@ defmodule Mimimi.Games.Round do
   @doc false
   def changeset(round, attrs) do
     round
-    |> cast(attrs, [:keyword_ids, :possible_words_ids, :position, :state, :game_id, :word_id])
+    |> cast(attrs, [
+      :keyword_ids,
+      :possible_words_ids,
+      :position,
+      :state,
+      :game_id,
+      :word_id,
+      :language_iso
+    ])
     |> validate_required([:position, :game_id, :word_id])
     |> validate_inclusion(:state, ["on_hold", "playing", "finished"])
     |> foreign_key_constraint(:game_id)

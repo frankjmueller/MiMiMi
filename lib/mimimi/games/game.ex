@@ -12,6 +12,9 @@ defmodule Mimimi.Games.Game do
     field :clues_interval, :integer, default: 10
     field :grid_size, :integer, default: 9
     field :word_types, {:array, :string}, default: ["Noun"]
+
+    # The game's language (ourwords iso_639_3, e.g. "deu"). Default "deu" — the M1 German-only baseline.
+    field :language_iso, :string, default: "deu"
     field :invitation_id, :binary_id
     field :host_token, :string
     field :state, :string, default: "waiting_for_players"
@@ -32,6 +35,7 @@ defmodule Mimimi.Games.Game do
       :clues_interval,
       :grid_size,
       :word_types,
+      :language_iso,
       :invitation_id,
       :host_token,
       :state,
@@ -43,9 +47,13 @@ defmodule Mimimi.Games.Game do
       :clues_interval,
       :grid_size,
       :word_types,
+      :language_iso,
       :host_user_id,
       :host_token
     ])
+    |> validate_format(:language_iso, ~r/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/,
+      message: "must be a valid language code"
+    )
     |> validate_inclusion(:rounds_count, 1..20)
     |> validate_inclusion(:clues_interval, [3, 6, 9, 12, 15, 20, 30, 45, 60])
     |> validate_inclusion(:grid_size, [2, 4, 9, 16])
@@ -66,7 +74,8 @@ defmodule Mimimi.Games.Game do
     changeset
     |> validate_length(:word_types, min: 1, message: "must include at least one word type")
     |> validate_change(:word_types, fn :word_types, types ->
-      valid_types = ["Noun", "Verb", "Adjective", "Adverb", "Other"]
+      # The delivery view maps only these four pos values; „Other" is gone (ADR 0075).
+      valid_types = ["Noun", "Verb", "Adjective", "Adverb"]
       invalid_types = Enum.reject(types, &(&1 in valid_types))
 
       if invalid_types == [] do

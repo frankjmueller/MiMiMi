@@ -54,13 +54,24 @@ defmodule MimimiWeb.HomeLive.Index do
     saved_grid = Map.get(session, "game_grid_size", "9")
 
     saved_types =
-      Map.get(session, "game_word_types", ["Noun", "Verb", "Adjective", "Adverb", "Other"])
+      Map.get(session, "game_word_types", ["Noun", "Verb", "Adjective", "Adverb"])
+      # „Other" is no longer a valid type (ADR 0075) — drop it from any old cookie value.
+      |> Enum.reject(&(&1 == "Other"))
+      |> case do
+        [] -> ["Noun"]
+        types -> types
+      end
+
+    languages = Games.playable_languages()
+    saved_language = Map.get(session, "game_language")
+    default_language = default_language(languages, saved_language)
 
     initial_params = %{
       "rounds_count" => saved_rounds,
       "clues_interval" => saved_interval,
       "grid_size" => saved_grid,
-      "word_types" => saved_types
+      "word_types" => saved_types,
+      "language_iso" => default_language
     }
 
     {:ok,
@@ -69,8 +80,22 @@ defmodule MimimiWeb.HomeLive.Index do
      |> assign(:invite_form, to_form(%{"code" => ""}, as: :invite))
      |> assign(:invite_error, nil)
      |> assign(:has_waiting_games, has_waiting_games)
+     |> assign(:languages, languages)
      |> assign(:page_title, "MiMiMi")
      |> validate_words_availability(initial_params)}
+  end
+
+  # Prefer the saved language if it is still playable, else the platform default (deu) if playable, else
+  # the first playable language, else deu (an empty lobby shows the availability error anyway).
+  defp default_language(languages, saved) do
+    isos = Enum.map(languages, & &1.language_iso)
+
+    cond do
+      saved in isos -> saved
+      "deu" in isos -> "deu"
+      isos != [] -> hd(isos)
+      true -> "deu"
+    end
   end
 
   @impl true
@@ -102,6 +127,11 @@ defmodule MimimiWeb.HomeLive.Index do
       |> push_event("set-cookie", %{
         name: "game_word_types",
         value: Enum.join(game_params["word_types"] || [], ","),
+        days: 365
+      })
+      |> push_event("set-cookie", %{
+        name: "game_language",
+        value: game_params["language_iso"] || "deu",
         days: 365
       })
 
@@ -149,12 +179,14 @@ defmodule MimimiWeb.HomeLive.Index do
     clues_interval = String.to_integer(game_params["clues_interval"] || "9")
     grid_size = String.to_integer(game_params["grid_size"] || "9")
     word_types = Map.get(game_params, "word_types", ["Noun"])
+    language_iso = game_params["language_iso"] || "deu"
 
     case Games.create_game(socket.assigns.current_user.id, %{
            rounds_count: rounds_count,
            clues_interval: clues_interval,
            grid_size: grid_size,
-           word_types: word_types
+           word_types: word_types,
+           language_iso: language_iso
          }) do
       {:ok, game} ->
         # Redirect to controller route that sets the host token cookie
@@ -191,6 +223,7 @@ defmodule MimimiWeb.HomeLive.Index do
           form={@form}
           words_error={@words_error}
           can_create_game={@can_create_game}
+          languages={@languages}
         />
       </div>
     </.page_container>
@@ -268,6 +301,7 @@ defmodule MimimiWeb.HomeLive.Index do
         phx-submit="save"
         class="space-y-7"
       >
+        <.render_language_selector :if={length(@languages) > 1} form={@form} languages={@languages} />
         <.render_rounds_and_time_inputs form={@form} />
         <.render_word_types_selector form={@form} />
         <.render_grid_size_selector form={@form} />
@@ -346,6 +380,35 @@ defmodule MimimiWeb.HomeLive.Index do
     """
   end
 
+  defp render_language_selector(assigns) do
+    ~H"""
+    <div class="space-y-2">
+      <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+        Sprache
+      </label>
+      <div class="relative group">
+        <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300">
+        </div>
+        <select
+          name="game[language_iso]"
+          class="relative w-full text-lg px-4 py-3.5 bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 focus:ring-4 focus:ring-purple-100 dark:focus:ring-purple-900/30 transition-all duration-200 dark:text-white outline-none cursor-pointer appearance-none"
+        >
+          <%= for language <- @languages do %>
+            <option
+              value={language.language_iso}
+              selected={@form[:language_iso].value == language.language_iso}
+              lang={language.language_iso}
+              dir={if language.rtl, do: "rtl", else: "ltr"}
+            >
+              {language.autonym}
+            </option>
+          <% end %>
+        </select>
+      </div>
+    </div>
+    """
+  end
+
   defp render_word_types_selector(assigns) do
     ~H"""
     <details class="group/details" id="word-types-details">
@@ -398,15 +461,6 @@ defmodule MimimiWeb.HomeLive.Index do
             checked={"Adverb" in (@form[:word_types].value || [])}
             label="Adverb"
             gradient="from-yellow-500 to-orange-500"
-          />
-
-          <.checkbox_button
-            id="word-type-other"
-            name="game[word_types][]"
-            value="Other"
-            checked={"Other" in (@form[:word_types].value || [])}
-            label="Andere"
-            gradient="from-pink-500 to-rose-500"
           />
         </div>
       </div>
@@ -490,6 +544,7 @@ defmodule MimimiWeb.HomeLive.Index do
     rounds_count = parse_integer(game_params["rounds_count"], 3)
     grid_size = parse_integer(game_params["grid_size"], 9)
     word_types = Map.get(game_params, "word_types", [])
+    language_iso = game_params["language_iso"] || "deu"
 
     word_types =
       case word_types do
@@ -508,7 +563,8 @@ defmodule MimimiWeb.HomeLive.Index do
       case Games.validate_word_availability(%{
              word_types: word_types,
              rounds_count: rounds_count,
-             grid_size: grid_size
+             grid_size: grid_size,
+             language_iso: language_iso
            }) do
         {:ok, _stats} ->
           socket

@@ -180,15 +180,16 @@ defmodule Mimimi.GamesTest do
     end
 
     test "accepts multiple valid word types", %{host_user: host_user} do
+      # The four delivery-view types (ADR 0075) — „Other" is no longer valid.
       {:ok, game} =
         Games.create_game(host_user.id, %{
           rounds_count: 3,
           clues_interval: 9,
           grid_size: 9,
-          word_types: ["Noun", "Verb", "Adjective", "Adverb", "Other"]
+          word_types: ["Noun", "Verb", "Adjective", "Adverb"]
         })
 
-      assert length(game.word_types) == 5
+      assert length(game.word_types) == 4
     end
   end
 
