@@ -42,7 +42,7 @@ defmodule MimimiWeb.DashboardLiveTest do
       {:ok, player_user} = Accounts.get_or_create_user_by_session("player_session")
 
       {:ok, _player} =
-        Games.create_player(player_user.id, game.id, %{avatar: "🐻", nickname: "🐻"})
+        Games.create_player(player_user.id, game.id, %{avatar: "🐻"})
 
       # Broadcast the player_joined event (this is what avatar selection does)
       Games.broadcast_to_game(game.id, :player_joined)
@@ -88,7 +88,7 @@ defmodule MimimiWeb.DashboardLiveTest do
 
       # Now they select an avatar
       {:ok, _player} =
-        Games.create_player(player_user.id, game.id, %{avatar: "🐻", nickname: "🐻"})
+        Games.create_player(player_user.id, game.id, %{avatar: "🐻"})
 
       Games.broadcast_to_game(game.id, {:pending_player_left, player_user.id})
       Games.broadcast_to_game(game.id, :player_joined)
@@ -108,7 +108,7 @@ defmodule MimimiWeb.DashboardLiveTest do
       {:ok, player_user} = Accounts.get_or_create_user_by_session("player_session")
 
       {:ok, _player} =
-        Games.create_player(player_user.id, game.id, %{avatar: "🐻", nickname: "🐻"})
+        Games.create_player(player_user.id, game.id, %{avatar: "🐻"})
 
       # Set up player session with the correct session_id
       player_conn =
@@ -155,7 +155,7 @@ defmodule MimimiWeb.DashboardLiveTest do
       {:ok, player_user} = Accounts.get_or_create_user_by_session("player_session")
 
       {:ok, _player} =
-        Games.create_player(player_user.id, game.id, %{avatar: "🐻", nickname: "🐻"})
+        Games.create_player(player_user.id, game.id, %{avatar: "🐻"})
 
       Games.broadcast_to_game(game.id, :player_joined)
       :timer.sleep(100)

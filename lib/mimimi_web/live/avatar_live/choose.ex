@@ -96,7 +96,7 @@ defmodule MimimiWeb.AvatarLive.Choose do
     avatars = Games.list_available_avatars(game.id)
 
     if Enum.any?(avatars, fn {a, available} -> a == avatar && available end) do
-      case Games.create_player(user.id, game.id, %{avatar: avatar, nickname: avatar}) do
+      case Games.create_player(user.id, game.id, %{avatar: avatar}) do
         {:ok, _player} ->
           # Notify that pending player is no longer pending (they joined)
           Games.broadcast_to_game(game.id, {:pending_player_left, user.id})

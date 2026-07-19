@@ -31,6 +31,10 @@ config :mimimi, MimimiWeb.Endpoint,
   secret_key_base: "OCTZfTtv0tdnEEHOLlzIYiMob9weL4BNT3kI1rexurx+Tz11l9rLszguijitDzwT",
   server: false
 
+# Internal pages (/debug, /list_words) are enabled in test so their happy-path tests run; the
+# child-safety gate (M4) is exercised by toggling this at runtime in internal_pages_test.exs.
+config :mimimi, internal_pages: true
+
 # In test we don't send emails
 config :mimimi, Mimimi.Mailer, adapter: Swoosh.Adapters.Test
 

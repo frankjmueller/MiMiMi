@@ -7,19 +7,22 @@ defmodule MimimiWeb.DebugLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    socket =
-      if connected?(socket) do
-        socket
-        |> assign(:loading, false)
-        |> assign(:system_info, get_system_info())
-        |> load_database_stats()
-      else
-        socket
-        |> assign(:loading, true)
-        |> assign(:system_info, get_system_info())
-      end
+    # Child-safety gate (M4): off in production unless explicitly enabled.
+    MimimiWeb.InternalPages.guard(socket, fn ->
+      socket =
+        if connected?(socket) do
+          socket
+          |> assign(:loading, false)
+          |> assign(:system_info, get_system_info())
+          |> load_database_stats()
+        else
+          socket
+          |> assign(:loading, true)
+          |> assign(:system_info, get_system_info())
+        end
 
-    {:ok, assign(socket, :page_title, "ourwords Debug")}
+      {:ok, assign(socket, :page_title, "ourwords Debug")}
+    end)
   end
 
   defp get_system_info do

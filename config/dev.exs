@@ -78,6 +78,9 @@ config :mimimi, MimimiWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :mimimi, dev_routes: true
 
+# Enable the internal pages (/debug, /list_words) in development (child-safety gate, M4).
+config :mimimi, internal_pages: true
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
 

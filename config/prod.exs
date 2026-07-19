@@ -7,6 +7,10 @@ import Config
 # before starting your production server.
 config :mimimi, MimimiWeb.Endpoint, cache_static_manifest: "priv/static/cache_manifest.json"
 
+# Child-safety (M4, ADR 0075): the internal /debug and /list_words pages expose internal ids and stats —
+# never served in production. Explicit even though false is already the default.
+config :mimimi, internal_pages: false
+
 # Configures Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Req
 

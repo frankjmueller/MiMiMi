@@ -9,8 +9,10 @@ defmodule Mimimi.Games.Player do
   @foreign_key_type :binary_id
   schema "players" do
     field :points, :integer, default: 0
+
+    # The avatar (unique per game) IS the player's identity — there is no free-text nickname a child
+    # could type into (M4 child-safety, ADR 0075).
     field :avatar, :string
-    field :nickname, :string
 
     belongs_to :user, Mimimi.Accounts.User
     belongs_to :game, Mimimi.Games.Game
@@ -22,7 +24,7 @@ defmodule Mimimi.Games.Player do
   @doc false
   def changeset(player, attrs) do
     player
-    |> cast(attrs, [:points, :avatar, :nickname, :user_id, :game_id])
+    |> cast(attrs, [:points, :avatar, :user_id, :game_id])
     |> validate_required([:user_id, :game_id])
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:game_id)

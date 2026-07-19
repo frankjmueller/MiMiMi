@@ -71,11 +71,14 @@ A mobile-first multiplayer word-guessing game built with Phoenix LiveView for Ge
 - Slider range dynamically adjusts to the maximum keyword count available
 - Images use the relative delivery path prefixed with `OURWORDS_ASSET_BASE_URL`
 
-### Debug Page
-- System diagnostics at `/debug` (excluded from search engines via robots.txt)
+### Debug Page (internal, gated)
+- System diagnostics at `/debug` — **child-safety gated (M4)**: like `/list_words`, it is only served when
+  `config :mimimi, internal_pages: true` (on in dev/test, **off by default in production**); otherwise a
+  visitor is redirected to the home page. It exposes internal ids and statistics, so it never reaches
+  children in production.
 - Displays Elixir version, Phoenix version, app version, and build timestamp
-- Shows WortSchule database connection status
-- Reports table counts for all WortSchule tables:
+- Shows the ourwords delivery-schema connection status
+- Reports counts over the delivery views (`mimimi.words`, `mimimi.keywords`, `mimimi.playable_languages`):
   - Total words, words with images, words with keywords
   - Words with both keywords and images (usable in game)
   - Keywords, ActiveStorage attachments and blobs

@@ -4,25 +4,28 @@ defmodule MimimiWeb.ListWordsLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    max_keywords = WortSchule.get_max_keywords_count()
-    max_keywords = max(max_keywords, 1)
+    # Child-safety gate (M4): off in production unless explicitly enabled.
+    MimimiWeb.InternalPages.guard(socket, fn ->
+      max_keywords = WortSchule.get_max_keywords_count()
+      max_keywords = max(max_keywords, 1)
 
-    socket =
-      socket
-      |> assign(:page_title, "Wörter mit Bild und Stichwörtern")
-      |> assign(:loading, true)
-      |> assign(:total_count, 0)
-      |> assign(:loaded_count, 0)
-      |> assign(:words_map, %{})
-      |> assign(:min_keywords, 1)
-      |> assign(:max_keywords, max_keywords)
-      |> stream(:words, [])
+      socket =
+        socket
+        |> assign(:page_title, "Wörter mit Bild und Stichwörtern")
+        |> assign(:loading, true)
+        |> assign(:total_count, 0)
+        |> assign(:loaded_count, 0)
+        |> assign(:words_map, %{})
+        |> assign(:min_keywords, 1)
+        |> assign(:max_keywords, max_keywords)
+        |> stream(:words, [])
 
-    if connected?(socket) do
-      send(self(), :load_words)
-    end
+      if connected?(socket) do
+        send(self(), :load_words)
+      end
 
-    {:ok, socket}
+      {:ok, socket}
+    end)
   end
 
   @impl true
