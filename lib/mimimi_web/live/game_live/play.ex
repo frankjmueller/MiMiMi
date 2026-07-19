@@ -724,6 +724,7 @@ defmodule MimimiWeb.GameLive.Play do
       time_elapsed={@time_elapsed}
       clues_interval={@game.clues_interval}
       all_players_picked={@all_players_picked}
+      language_iso={@current_round.language_iso}
     />
 
     <.glass_card class="p-8">
@@ -735,12 +736,14 @@ defmodule MimimiWeb.GameLive.Play do
           waiting_for_others={@waiting_for_others}
           game={@game}
           players_picked={@players_picked}
+          language_iso={@current_round.language_iso}
         />
       <% else %>
         <.render_word_selection_grid
           possible_words={@possible_words}
           grid_size={@game.grid_size}
           has_picked={@has_picked}
+          language_iso={@current_round.language_iso}
         />
       <% end %>
     </.glass_card>
@@ -760,6 +763,7 @@ defmodule MimimiWeb.GameLive.Play do
             time_elapsed={@time_elapsed}
             clues_interval={@clues_interval}
             all_picked?={@all_players_picked}
+            language_iso={@language_iso}
           />
         <% end %>
       </div>
@@ -771,7 +775,7 @@ defmodule MimimiWeb.GameLive.Play do
   defp render_word_selection_grid(assigns) do
     ~H"""
     <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-      Bilder zur Auswahl
+      {gettext("Bilder zur Auswahl")}
     </h2>
     <div class={[
       "grid gap-4",
@@ -798,10 +802,10 @@ defmodule MimimiWeb.GameLive.Play do
             </div>
           <% end %>
 
-          <%!-- Label --%>
+          <%!-- Label — verbatim + bidi-aware (HR2): clicks/diacritics/RTL survive untouched. --%>
           <div class="absolute inset-0 flex items-end justify-center pb-2 bg-gradient-to-t from-black/60 to-transparent">
             <p class="text-white font-semibold text-center px-2">
-              {word.name}
+              <bdi lang={@language_iso} dir="auto">{word.name}</bdi>
             </p>
           </div>
         </button>
@@ -837,12 +841,12 @@ defmodule MimimiWeb.GameLive.Play do
         />
 
         <h2 class="text-3xl font-bold mb-2 text-gray-900 dark:text-white">
-          {if @pick_result == :correct, do: "Richtig!", else: "Leider falsch"}
+          {if @pick_result == :correct, do: gettext("Richtig!"), else: gettext("Leider falsch")}
         </h2>
 
         <%= if @pick_result == :correct do %>
           <p class="text-xl text-green-600 dark:text-green-400 font-semibold mb-4">
-            +{@points_earned} Punkte!
+            {gettext("+%{points} Punkte!", points: @points_earned)}
           </p>
         <% end %>
       </div>
@@ -852,6 +856,7 @@ defmodule MimimiWeb.GameLive.Play do
         <.render_correct_word_display
           correct_word_info={@correct_word_info}
           pick_result={@pick_result}
+          language_iso={@language_iso}
         />
       <% end %>
 
@@ -859,7 +864,7 @@ defmodule MimimiWeb.GameLive.Play do
         <.render_waiting_for_others_section game={@game} players_picked={@players_picked} />
       <% else %>
         <p class="text-gray-600 dark:text-gray-400 mb-6">
-          Nächste Runde beginnt...
+          {gettext("Nächste Runde beginnt...")}
         </p>
       <% end %>
     </div>
@@ -880,7 +885,9 @@ defmodule MimimiWeb.GameLive.Play do
           else: "text-gray-600 dark:text-gray-400"
         )
       ]}>
-        {if @pick_result == :correct, do: "Du hast richtig getippt:", else: "Richtige Antwort:"}
+        {if @pick_result == :correct,
+          do: gettext("Du hast richtig getippt:"),
+          else: gettext("Richtige Antwort:")}
       </p>
       <div class="relative overflow-hidden rounded-2xl border-2 border-green-500 dark:border-green-400 shadow-lg">
         <%!-- Image --%>
@@ -895,10 +902,10 @@ defmodule MimimiWeb.GameLive.Play do
             <span class="text-6xl">🖼️</span>
           </div>
         <% end %>
-        <%!-- Label with green gradient --%>
+        <%!-- Label with green gradient — verbatim + bidi-aware (HR2). --%>
         <div class="absolute inset-0 flex items-end justify-center pb-3 bg-gradient-to-t from-green-900/80 to-transparent">
           <p class="text-white font-bold text-xl px-3 text-center">
-            {@correct_word_info.name}
+            <bdi lang={@language_iso} dir="auto">{@correct_word_info.name}</bdi>
           </p>
         </div>
       </div>

@@ -63,6 +63,7 @@ defmodule MimimiWeb.GameComponents do
   attr :selectable, :boolean, default: false
   attr :selected, :boolean, default: false
   attr :class, :string, default: nil
+  attr :language_iso, :string, default: "deu"
   attr :rest, :global
 
   def word_card(assigns) do
@@ -93,7 +94,7 @@ defmodule MimimiWeb.GameComponents do
         :if={@show_label}
         class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white font-semibold text-center"
       >
-        {@word.name}
+        <bdi lang={@language_iso} dir="auto">{@word.name}</bdi>
       </div>
     </div>
     """
@@ -148,6 +149,7 @@ defmodule MimimiWeb.GameComponents do
   attr :keywords, :list, required: true
   attr :revealed, :integer, default: 0
   attr :class, :string, default: nil
+  attr :language_iso, :string, default: "deu"
 
   def keyword_badges(assigns) do
     ~H"""
@@ -155,14 +157,14 @@ defmodule MimimiWeb.GameComponents do
       <div :for={{keyword, index} <- Enum.with_index(@keywords)} class="relative">
         <%= cond do %>
           <% index < @revealed -> %>
-            <%!-- Revealed keyword --%>
+            <%!-- Revealed keyword — verbatim + bidi-aware (HR2). --%>
             <div class="backdrop-blur-xl bg-white/70 dark:bg-gray-800/70 rounded-2xl p-4 border border-gray-200/50 dark:border-gray-700/50">
               <div class="flex items-center gap-3">
                 <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">
                   {index + 1}
                 </div>
                 <div class="flex-1 text-lg font-semibold text-gray-900 dark:text-white">
-                  {keyword.name}
+                  <bdi lang={@language_iso} dir="auto">{keyword.name}</bdi>
                 </div>
               </div>
             </div>
@@ -249,6 +251,7 @@ defmodule MimimiWeb.GameComponents do
   attr :clues_interval, :integer, required: true
   attr :all_picked?, :boolean, default: false
   attr :class, :string, default: nil
+  attr :language_iso, :string, default: "deu"
 
   def keyword_badge(assigns) do
     ~H"""
@@ -308,7 +311,11 @@ defmodule MimimiWeb.GameComponents do
         <%= if @all_picked? && (is_revealed || is_current) do %>
           <span class="text-lg">✓</span>
         <% end %>
-        {if is_revealed || is_current, do: @keyword.name, else: "???"}
+        <%= if is_revealed || is_current do %>
+          <bdi lang={@language_iso} dir="auto">{@keyword.name}</bdi>
+        <% else %>
+          ???
+        <% end %>
       </span>
     </div>
     """

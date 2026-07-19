@@ -881,6 +881,7 @@ defmodule MimimiWeb.DashboardLive.Show do
             keywords_revealed={@keywords_revealed}
             time_elapsed={@time_elapsed}
             clues_interval={@game.clues_interval}
+            language_iso={@game.language_iso}
           />
         <% end %>
       </div>
@@ -903,14 +904,14 @@ defmodule MimimiWeb.DashboardLive.Show do
               <img src={word.image_url} alt={word.name} class="w-full h-full object-cover" />
               <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2">
                 <p class="text-white text-sm font-semibold text-center truncate">
-                  {word.name}
+                  <bdi lang={@game.language_iso} dir="auto">{word.name}</bdi>
                 </p>
               </div>
             <% else %>
               <div class="w-full h-full flex flex-col items-center justify-center">
                 <span class="text-4xl mb-2">🖼️</span>
                 <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold text-center px-2">
-                  {word.name}
+                  <bdi lang={@game.language_iso} dir="auto">{word.name}</bdi>
                 </p>
               </div>
             <% end %>
@@ -997,7 +998,7 @@ defmodule MimimiWeb.DashboardLive.Show do
                   <% end %>
                   <div class="flex-1">
                     <p class="font-semibold text-gray-900 dark:text-white">
-                      {player_pick.picked_word.name}
+                      <bdi lang={@game.language_iso} dir="auto">{player_pick.picked_word.name}</bdi>
                     </p>
                     <p class="text-xs text-gray-600 dark:text-gray-400">
                       {player_pick.keywords_shown} Hinweise • {player_pick.time}s
@@ -1427,14 +1428,14 @@ defmodule MimimiWeb.DashboardLive.Show do
                           />
                           <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2">
                             <p class="text-white text-xs font-semibold text-center truncate">
-                              {word.name}
+                              <bdi lang={@game.language_iso} dir="auto">{word.name}</bdi>
                             </p>
                           </div>
                         <% else %>
                           <div class="w-full h-full flex flex-col items-center justify-center">
                             <span class="text-4xl mb-2">🖼️</span>
                             <p class="text-xs text-gray-600 dark:text-gray-400 font-semibold text-center px-2">
-                              {word.name}
+                              <bdi lang={@game.language_iso} dir="auto">{word.name}</bdi>
                             </p>
                           </div>
                         <% end %>
