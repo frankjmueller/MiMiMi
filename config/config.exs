@@ -8,7 +8,10 @@
 import Config
 
 config :mimimi,
-  ecto_repos: [Mimimi.Repo, Mimimi.WortSchuleRepo],
+  # Only Mimimi.Repo carries migrations. The words repo (Mimimi.WortSchuleRepo) points at the
+  # ourwords delivery schema (ADR 0075) — read-only in prod, a fixture rebuild in test — and must
+  # never be created/migrated by ecto tasks.
+  ecto_repos: [Mimimi.Repo],
   generators: [timestamp_type: :utc_datetime],
   invitation_expiration_minutes: 15
 

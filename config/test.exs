@@ -6,19 +6,21 @@ import Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :mimimi, Mimimi.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
+  username: System.get_env("MIMIMI_TEST_DB_USER", "postgres"),
+  password: System.get_env("MIMIMI_TEST_DB_PASSWORD", "postgres"),
+  hostname: System.get_env("MIMIMI_TEST_DB_HOST", "localhost"),
   database: "mimimi_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
-# Configure wort.schule database for testing (read-only)
+# The words test database: a local fixture rebuild of the ourwords delivery schema (ADR 0075) —
+# tests never touch a real ourwords/wort.schule database and never need the network. The schema is
+# loaded by priv/repo/load_ourwords_fixture_schema.exs via the `mix test` alias.
 config :mimimi, Mimimi.WortSchuleRepo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "wortschule_development",
+  username: System.get_env("MIMIMI_TEST_DB_USER", "postgres"),
+  password: System.get_env("MIMIMI_TEST_DB_PASSWORD", "postgres"),
+  hostname: System.get_env("MIMIMI_TEST_DB_HOST", "localhost"),
+  database: "mimimi_words_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
