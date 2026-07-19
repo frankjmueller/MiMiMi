@@ -57,20 +57,19 @@ A mobile-first multiplayer word-guessing game built with Phoenix LiveView for Ge
   - Players keep their original avatars in the rematch
   - Host sees status of online/offline players before starting
 
-### Image Validation
-- **Pre-validated Images**: All words used in games are validated to have actual working image URLs from the wort.schule API
-- **Keyword Validation**: Keywords are validated to have proper names before being used in rounds
-- **Graceful Error Handling**: Games fail early with informative German error messages if insufficient valid content is available
+### Content Guarantees
+- **Images by construction**: the `mimimi.words` delivery view only serves words that have an image, so the round pool needs no per-word image check (ADR 0075)
+- **Keyword Validation**: keyword ids are resolved against the keywords view before use in rounds
+- **Graceful Error Handling**: games fail early with informative German error messages if insufficient content is available
 - This prevents players from seeing broken images or "???" placeholder keywords during gameplay
 
 ### Word List Page
-- Browse all words from WortSchule database that have keywords and images
-- Visit `/list_words` to see the complete word collection with visuals
+- Browse words from the ourwords delivery views that have keywords and images
+- Visit `/list_words` to see the collection with visuals (staff-gated in production — see M4)
 - Each word displays its image and all associated keywords
 - Filter words by minimum number of keywords using the interactive slider
-- Slider range dynamically adjusts to the maximum keyword count in the database
-- Filtering correctly excludes orphaned keywords (keywords pointing to non-existent words)
-- Images are loaded directly from wort.schule with complete URLs
+- Slider range dynamically adjusts to the maximum keyword count available
+- Images use the relative delivery path prefixed with `OURWORDS_ASSET_BASE_URL`
 
 ### Debug Page
 - System diagnostics at `/debug` (excluded from search engines via robots.txt)
@@ -202,11 +201,11 @@ Mimimi.WortSchule.get_keywords_batch([456, 789])
 Mimimi.WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 3, types: ["Noun"], language: "deu")
 ```
 
-### Direct Image URLs
+### Image URLs
 
-The wort.schule JSON API now provides complete, direct image URLs without redirects. All image URLs returned by `Mimimi.WortSchule.get_image_url/1` and `get_complete_word/1` are direct URLs from wort.schule (e.g., `https://wort.schule/rails/active_storage/disk/...`).
-
-See `WortSchuleIntegration.md` for complete integration documentation.
+`mimimi.words.image_url` is a **relative** ActiveStorage path (e.g. `/rails/active_storage/...`). The game
+prepends `OURWORDS_ASSET_BASE_URL` to it in `get_complete_word/1`; with an empty base the path passes
+through unchanged. There is no image URL cache and no per-word HTTP call anymore.
 
 ## 📄 Deployment
 

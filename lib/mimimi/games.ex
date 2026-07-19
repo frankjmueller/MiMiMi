@@ -10,6 +10,11 @@ defmodule Mimimi.Games do
   # Constants
   @lobby_timeout_seconds 15 * 60
 
+  # M1 is German-only (ourwords iso_639_3 "deu"). The word pool and the analytics language are pinned to
+  # this constant so a German game never draws words of another language from the multilingual delivery
+  # views. M2 replaces it with a per-game language field.
+  @game_language "deu"
+
   # Compile-time environment check
   # IMPORTANT: Mix is not available in production releases, so we check at compile time
   @test_env Mix.env() == :test
@@ -124,10 +129,18 @@ defmodule Mimimi.Games do
     grid_size = Map.get(attrs, :grid_size, 9)
 
     target_word_ids =
-      WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 3, types: word_types)
+      WortSchule.get_word_ids_with_keywords_and_images(
+        min_keywords: 3,
+        types: word_types,
+        language: @game_language
+      )
 
     all_word_ids =
-      WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, types: word_types)
+      WortSchule.get_word_ids_with_keywords_and_images(
+        min_keywords: 1,
+        types: word_types,
+        language: @game_language
+      )
 
     target_count = length(target_word_ids)
     total_count = length(all_word_ids)
@@ -534,7 +547,11 @@ defmodule Mimimi.Games do
 
     # Get word pools (this is cached by the database for subsequent calls)
     target_word_ids_raw =
-      WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 3, types: game.word_types)
+      WortSchule.get_word_ids_with_keywords_and_images(
+        min_keywords: 3,
+        types: game.word_types,
+        language: @game_language
+      )
 
     # The delivery view guarantees an image (ADR 0075) — no per-word HTTP check.
     target_word_ids = target_word_ids_raw
@@ -544,7 +561,11 @@ defmodule Mimimi.Games do
     )
 
     all_word_ids =
-      WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, types: game.word_types)
+      WortSchule.get_word_ids_with_keywords_and_images(
+        min_keywords: 1,
+        types: game.word_types,
+        language: @game_language
+      )
 
     Logger.info("Found #{length(all_word_ids)} words for game #{game.id} round #{position}")
 
@@ -827,7 +848,11 @@ defmodule Mimimi.Games do
 
     # Get words with at least 3 keywords for target words, filtered by word types
     target_word_ids_raw =
-      WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 3, types: game.word_types)
+      WortSchule.get_word_ids_with_keywords_and_images(
+        min_keywords: 3,
+        types: game.word_types,
+        language: @game_language
+      )
 
     # The delivery view guarantees an image (image_url present is a WHERE clause) — no per-word HTTP
     # check needed anymore (ADR 0075).
@@ -841,7 +866,11 @@ defmodule Mimimi.Games do
 
     # Get all words with at least 1 keyword for distractors, filtered by word types
     all_word_ids_raw =
-      WortSchule.get_word_ids_with_keywords_and_images(min_keywords: 1, types: game.word_types)
+      WortSchule.get_word_ids_with_keywords_and_images(
+        min_keywords: 1,
+        types: game.word_types,
+        language: @game_language
+      )
 
     all_word_ids = all_word_ids_raw
 

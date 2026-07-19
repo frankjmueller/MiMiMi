@@ -63,6 +63,41 @@ defmodule Mimimi.Games.RoundValidationTest do
         assert is_binary(image_url) and image_url != ""
       end)
     end
+
+    test "the pool is language-pure — a German game never draws a word of another language", %{
+      host: host
+    } do
+      seed_pool()
+
+      # An equally playable English pool sitting alongside — it must never enter a German game (M1).
+      OurwordsFixtures.insert_language("eng", autonym: "English")
+
+      for id <- 101..108 do
+        OurwordsFixtures.insert_word(id: id, language_iso: "eng", name: "word#{id}", type: "Noun")
+        OurwordsFixtures.insert_keywords(id, "eng", ["k#{id}a", "k#{id}b", "k#{id}c"])
+      end
+
+      {:ok, game} =
+        Games.create_game(host.id, %{
+          rounds_count: 2,
+          clues_interval: 9,
+          grid_size: 4,
+          word_types: ["Noun"]
+        })
+
+      Games.generate_rounds(game)
+
+      rounds = Repo.all(from(r in Games.Round, where: r.game_id == ^game.id))
+      all_word_ids = Enum.flat_map(rounds, & &1.possible_words_ids)
+
+      %{rows: languages} =
+        Mimimi.WortSchuleRepo.query!(
+          "SELECT DISTINCT language_iso FROM mimimi.words WHERE id = ANY($1)",
+          [all_word_ids]
+        )
+
+      assert List.flatten(languages) == ["deu"], "target and distractors must all be German"
+    end
   end
 
   describe "insufficient data raises an informative error" do

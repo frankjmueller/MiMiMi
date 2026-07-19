@@ -15,7 +15,7 @@ This document describes the `keyword_effectiveness` table and how to use it for 
 
 ### System Overview
 
-MiMiMi is a multiplayer word-guessing game built with Phoenix LiveView. It uses word and keyword data from WortSchule (a Rails application). The analytics data is stored in the `wortschule_production` database (table created and managed by Rails) so Rails developers can analyze it directly.
+MiMiMi is a multiplayer word-guessing game built with Phoenix LiveView. It reads word and keyword data from ourwords through the `mimimi` delivery schema (ADR 0075). The analytics data is written to `mimimi.keyword_effectiveness` in the ourwords database (table created and managed by ourwords/Rails) so editorial staff can analyze it directly.
 
 ### Game Flow
 
@@ -65,11 +65,12 @@ This granular approach lets you analyze:
 
 | Data | Source | Notes |
 |------|--------|-------|
-| `word_id` | WortSchule `words.id` | The target word player should guess |
-| `keyword_id` | WortSchule `words.id` | Keywords are also words (many-to-many self-reference) |
-| `pick_id` | MiMiMi `picks.id` | UUID, links to player's guess record |
-| `round_id` | MiMiMi `rounds.id` | UUID, links to game round |
-| Timestamps | Phoenix LiveView | Captured in real-time during gameplay |
+| `word_id` | `mimimi.words.id` | ourwords public word id (target word) |
+| `keyword_id` | `mimimi.keywords.keyword_id` | a **sense_relation id** — keywords are their own namespace, not words |
+| `language_iso` | the round's language | iso_639_3 (e.g. `deu`) |
+| `pick_id` | MiMiMi (opaque UUID) | no player identity |
+| `round_id` | MiMiMi (opaque UUID) | game round reference |
+| Timestamps | Phoenix LiveView | captured in real-time during gameplay |
 
 ### Timing Accuracy
 
@@ -92,16 +93,17 @@ Each row represents a single keyword that was visible when a player made a guess
 
 | Column | Type | Description |
 |--------|------|-------------|
-| `id` | UUID | Primary key |
-| `word_id` | integer | WortSchule word ID (target word) |
-| `keyword_id` | integer | WortSchule keyword ID that was shown |
-| `pick_id` | UUID | Reference to the player's pick in MiMiMi |
-| `round_id` | UUID | Reference to the game round in MiMiMi |
-| `keyword_position` | integer | Order keyword was revealed (1st, 2nd, 3rd...) |
-| `revealed_at` | timestamp | Exact time keyword was shown to player |
-| `picked_at` | timestamp | Exact time player made their guess |
-| `led_to_correct` | boolean | Whether the guess was correct |
-| `inserted_at` | timestamp | Record creation time |
+| `id` | bigserial | Primary key (filled by ourwords Postgres) |
+| `word_id` | integer | ourwords public word id (target word, `source_entry_id`) |
+| `keyword_id` | integer | **sense_relation id** of the keyword that was shown (NOT a word id) |
+| `language_iso` | varchar | the round's language (iso_639_3, e.g. `deu`) |
+| `pick_id` | UUID | game-round-opaque pick reference (no player identity) |
+| `round_id` | UUID | game-round-opaque round reference |
+| `keyword_position` | integer | order keyword was revealed (CHECK 1..5) |
+| `revealed_at` | timestamp | exact time keyword was shown to player |
+| `picked_at` | timestamp | exact time player made their guess |
+| `led_to_correct` | boolean | whether the guess was correct |
+| `created_at` | timestamp | record creation time (INSERT-only, no `updated_at`) |
 
 ### Indexes
 
@@ -309,12 +311,12 @@ After updating keywords, track new data:
 # Compare before/after a date
 before_stats = KeywordEffectiveness
   .for_word(word_id)
-  .where('inserted_at < ?', change_date)
+  .where('created_at < ?', change_date)
   .calculate_stats
 
 after_stats = KeywordEffectiveness
   .for_word(word_id)
-  .where('inserted_at >= ?', change_date)
+  .where('created_at >= ?', change_date)
   .calculate_stats
 ```
 
@@ -325,7 +327,7 @@ after_stats = KeywordEffectiveness
 ```ruby
 # Find keywords with >10 samples and <30% success rate in last 24 hours
 KeywordEffectiveness
-  .where('inserted_at >= ?', 24.hours.ago)
+  .where('created_at >= ?', 24.hours.ago)
   .group(:word_id, :keyword_id)
   .having('COUNT(*) >= 10')
   .having('SUM(CASE WHEN led_to_correct THEN 1.0 ELSE 0.0 END) / COUNT(*) < 0.3')
@@ -347,7 +349,7 @@ sql = <<-SQL
          SUM(CASE WHEN led_to_correct THEN 1 ELSE 0 END)::float /
            COUNT(DISTINCT pick_id) as success_rate
   FROM keyword_effectiveness
-  WHERE inserted_at >= NOW() - INTERVAL '7 days'
+  WHERE created_at >= NOW() - INTERVAL '7 days'
   GROUP BY word_id
   HAVING COUNT(DISTINCT pick_id) >= 20
     AND SUM(CASE WHEN led_to_correct THEN 1 ELSE 0 END)::float /
