@@ -1,0 +1,742 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1130
+#, elixir-autogen, elixir-format
+msgid "%{correct} richtig, %{wrong} falsch"
+msgstr "%{correct} correct, %{wrong} wrong"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1011
+#, elixir-autogen, elixir-format
+msgid "%{count} Hinweis • %{time}s"
+msgid_plural "%{count} Hinweise • %{time}s"
+msgstr[0] "%{count} clue • %{time}s"
+msgstr[1] "%{count} clues • %{time}s"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1142
+#, elixir-autogen, elixir-format
+msgid "%{count} Hinweise"
+msgstr "%{count} clues"
+
+#: lib/mimimi_web/components/game_components.ex:132
+#: lib/mimimi_web/live/dashboard_live/show.ex:1068
+#: lib/mimimi_web/live/dashboard_live/show.ex:1139
+#: lib/mimimi_web/live/dashboard_live/show.ex:1183
+#: lib/mimimi_web/live/dashboard_live/show.ex:1389
+#, elixir-autogen, elixir-format
+msgid "%{count} Punkt"
+msgid_plural "%{count} Punkte"
+msgstr[0] "%{count} point"
+msgstr[1] "%{count} points"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1428
+#, elixir-autogen, elixir-format
+msgid "%{count} Punkt gesammelt"
+msgid_plural "%{count} Punkte gesammelt"
+msgstr[0] "%{count} point collected"
+msgstr[1] "%{count} points collected"
+
+#: lib/mimimi_web/live/home_live/index.ex:362
+#: lib/mimimi_web/live/home_live/index.ex:365
+#: lib/mimimi_web/live/home_live/index.ex:371
+#: lib/mimimi_web/live/home_live/index.ex:374
+#: lib/mimimi_web/live/home_live/index.ex:377
+#: lib/mimimi_web/live/home_live/index.ex:380
+#: lib/mimimi_web/live/home_live/index.ex:383
+#: lib/mimimi_web/live/home_live/index.ex:386
+#: lib/mimimi_web/live/home_live/index.ex:389
+#: lib/mimimi_web/live/home_live/index.ex:392
+#, elixir-autogen, elixir-format
+msgid "%{count} Sek."
+msgstr "%{count} sec"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1421
+#, elixir-autogen, elixir-format
+msgid "%{count} Wort richtig"
+msgid_plural "%{count} Wörter richtig"
+msgstr[0] "%{count} word right"
+msgstr[1] "%{count} words right"
+
+#: lib/mimimi_web/live/game_live/play.ex:623
+#, elixir-autogen, elixir-format
+msgid "(+ %{count} wählt Avatar...)"
+msgstr "(+ %{count} choosing an animal...)"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:734
+#, elixir-autogen, elixir-format
+msgid "+ %{count} wählt Avatar..."
+msgstr "+ %{count} choosing an animal..."
+
+#: lib/mimimi_web/live/game_live/play.ex:861
+#, elixir-autogen, elixir-format
+msgid "+%{points} Punkte!"
+msgstr "+%{points} points!"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1236
+#, elixir-autogen, elixir-format
+msgid "Abbrechen"
+msgstr "Cancel"
+
+#: lib/mimimi_web/components/core_components.ex:342
+#, elixir-autogen, elixir-format
+msgid "Actions"
+msgstr ""
+
+#: lib/mimimi_web/live/home_live/index.ex:477
+#, elixir-autogen, elixir-format
+msgid "Adjektiv"
+msgstr "Adjective"
+
+#: lib/mimimi_web/live/home_live/index.ex:486
+#, elixir-autogen, elixir-format
+msgid "Adverb"
+msgstr "Adverb"
+
+#: lib/mimimi_web/components/layouts.ex:158
+#, elixir-autogen, elixir-format
+msgid "Aktive Spiele:"
+msgstr "Active games:"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1045
+#: lib/mimimi_web/live/dashboard_live/show.ex:1160
+#, elixir-autogen, elixir-format
+msgid "Aktuelle Rangliste"
+msgstr "Current ranking"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1492
+#, elixir-autogen, elixir-format
+msgid "Alle Spieler sind noch online"
+msgstr "All players are still online"
+
+#: lib/mimimi_web/live/list_words_live/index.ex:161
+#, elixir-autogen, elixir-format
+msgid "Alle Wörter mit Stichwörtern und Bildern"
+msgstr "All words with keywords and pictures"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:851
+#, elixir-autogen, elixir-format
+msgid "Antworten anzeigen"
+msgstr "Show answers"
+
+#: lib/mimimi_web/components/layouts.ex:83
+#: lib/mimimi_web/components/layouts.ex:95
+#, elixir-autogen, elixir-format
+msgid "Attempting to reconnect"
+msgstr ""
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:209
+#, elixir-autogen, elixir-format
+msgid "Besetzt"
+msgstr "Taken"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:903
+#: lib/mimimi_web/live/game_live/play.ex:790
+#, elixir-autogen, elixir-format
+msgid "Bilder zur Auswahl"
+msgstr "Pictures to choose from"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1083
+#, elixir-autogen, elixir-format
+msgid "Bisherige Leistung"
+msgstr "Progress so far"
+
+#: lib/mimimi_web/live/home_live/index.ex:537
+#, elixir-autogen, elixir-format
+msgid "Bitte gib einen Einladungscode ein"
+msgstr "Please enter an invitation code"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1273
+#, elixir-autogen, elixir-format
+msgid "Bitte warten Sie einen Moment"
+msgstr "Please wait a moment"
+
+#: lib/mimimi_web/live/home_live/index.ex:583
+#, elixir-autogen, elixir-format
+msgid "Bitte wähle mindestens eine Wortart aus, um ein Spiel zu erstellen."
+msgstr "Please choose at least one word type to create a game."
+
+#: lib/mimimi_web/components/layouts.ex:168
+#, elixir-autogen, elixir-format
+msgid "Bundesministerium für Familie, Senioren, Frauen und Jugend"
+msgstr "Federal Ministry for Family Affairs, Senior Citizens, Women and Youth"
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:67
+#, elixir-autogen, elixir-format
+msgid "Das Spiel hat schon angefangen."
+msgstr "The game has already started."
+
+#: lib/mimimi_web/live/game_live/play.ex:35
+#, elixir-autogen, elixir-format
+msgid "Das Spiel ist nicht mehr aktiv."
+msgstr "This game is no longer active."
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:73
+#, elixir-autogen, elixir-format
+msgid "Das Spiel ist schon fertig."
+msgstr "The game is already over."
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:79
+#: lib/mimimi_web/live/avatar_live/choose.ex:145
+#: lib/mimimi_web/live/dashboard_live/show.ex:228
+#: lib/mimimi_web/live/dashboard_live/show.ex:300
+#: lib/mimimi_web/live/game_live/play.ex:248
+#, elixir-autogen, elixir-format
+msgid "Das Spiel ist zu Ende. Es hat zu lange gedauert."
+msgstr "The game is over. It took too long."
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1226
+#, elixir-autogen, elixir-format
+msgid "Das Spiel wird sofort beendet und alle Spieler sehen die finale Rangliste."
+msgstr "The game ends right away and all players see the final ranking."
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:307
+#, elixir-autogen, elixir-format
+msgid "Das Spiel wurde abgebrochen."
+msgstr "The game was cancelled."
+
+#: lib/mimimi_web/live/game_live/play.ex:455
+#, elixir-autogen, elixir-format
+msgid "Das Spiel wurde vom Spielleiter beendet."
+msgstr "The game was ended by the host."
+
+#: lib/mimimi_web/live/home_live/index.ex:544
+#, elixir-autogen, elixir-format
+msgid "Der Code muss 6 Ziffern haben"
+msgstr "The code must have 6 digits"
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:85
+#: lib/mimimi_web/live/avatar_live/choose.ex:152
+#, elixir-autogen, elixir-format
+msgid "Der Gastgeber hat die Verbindung verloren."
+msgstr "The host lost the connection."
+
+#: lib/mimimi_web/live/game_helpers.ex:66
+#, elixir-autogen, elixir-format
+msgid "Der Host hat das Spiel verlassen."
+msgstr "The host left the game."
+
+#: lib/mimimi_web/live/game_live/play.ex:447
+#, elixir-autogen, elixir-format
+msgid "Der Spielleiter hat die Verbindung getrennt. Das Spiel wurde beendet."
+msgstr "The host disconnected. The game has ended."
+
+#: lib/mimimi_web/live/game_helpers.ex:63
+#, elixir-autogen, elixir-format
+msgid "Die Lobby-Zeit für dieses Spiel ist abgelaufen."
+msgstr "The lobby time for this game has run out."
+
+#: lib/mimimi_web/live/game_helpers.ex:54
+#, elixir-autogen, elixir-format
+msgid "Dieser Code existiert nicht."
+msgstr "This code does not exist."
+
+#: lib/mimimi_web/live/game_helpers.ex:55
+#, elixir-autogen, elixir-format
+msgid "Dieser Code ist abgelaufen."
+msgstr "This code has expired."
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:55
+#, elixir-autogen, elixir-format
+msgid "Dieser Link geht nicht."
+msgstr "This link does not work."
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:61
+#, elixir-autogen, elixir-format
+msgid "Dieser Link ist abgelaufen."
+msgstr "This link has expired."
+
+#: lib/mimimi_web/live/game_helpers.ex:58
+#, elixir-autogen, elixir-format
+msgid "Dieses Spiel hat bereits begonnen."
+msgstr "This game has already begun."
+
+#: lib/mimimi_web/live/game_helpers.ex:60
+#, elixir-autogen, elixir-format
+msgid "Dieses Spiel ist bereits beendet."
+msgstr "This game is already over."
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:109
+#: lib/mimimi_web/live/avatar_live/choose.ex:115
+#, elixir-autogen, elixir-format
+msgid "Dieses Tier ist schon besetzt."
+msgstr "This animal is already taken."
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:20
+#, elixir-autogen, elixir-format
+msgid "Du bist bereits in einem aktiven Spiel."
+msgstr "You are already in an active game."
+
+#: lib/mimimi_web/live/game_live/play.ex:613
+#, elixir-autogen, elixir-format
+msgid "Du bist dabei!"
+msgstr "You're in!"
+
+#: lib/mimimi_web/live/game_live/play.ex:30
+#, elixir-autogen, elixir-format
+msgid "Du bist nicht in diesem Spiel."
+msgstr "You are not in this game."
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:469
+#, elixir-autogen, elixir-format
+msgid "Du brauchst mehr Spieler."
+msgstr "You need more players."
+
+#: lib/mimimi_web/live/game_live/play.ex:901
+#, elixir-autogen, elixir-format
+msgid "Du hast richtig getippt:"
+msgstr "You guessed right:"
+
+#: lib/mimimi_web/live/game_helpers.ex:68
+#, elixir-autogen, elixir-format
+msgid "Ein Fehler ist aufgetreten."
+msgstr "Something went wrong."
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:428
+#: lib/mimimi_web/live/game_live/play.ex:462
+#, elixir-autogen, elixir-format
+msgid "Ein neues Spiel wurde gestartet!"
+msgstr "A new game has started!"
+
+#: lib/mimimi_web/live/game_live/play.ex:687
+#, elixir-autogen, elixir-format
+msgid "Einen Moment bitte"
+msgstr "Just a moment"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:646
+#, elixir-autogen, elixir-format
+msgid "Einladungscode"
+msgstr "Invitation code"
+
+#: lib/mimimi_web/live/home_live/index.ex:326
+#, elixir-autogen, elixir-format
+msgid "Einladungslink generieren"
+msgstr "Create invitation link"
+
+#: lib/mimimi_web/live/home_live/index.ex:293
+#, elixir-autogen, elixir-format
+msgid "Erstelle ein neues Spiel"
+msgstr "Create a new game"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:486
+#, elixir-autogen, elixir-format
+msgid "Fehler beim Abbrechen des Spiels"
+msgstr "Something went wrong cancelling the game"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:316
+#, elixir-autogen, elixir-format
+msgid "Fehler beim Erstellen der Spielrunden. Bitte versuche es erneut."
+msgstr "Something went wrong creating the game rounds. Please try again."
+
+#: lib/mimimi_web/live/home_live/index.ex:198
+#, elixir-autogen, elixir-format
+msgid "Fehler beim Erstellen des Spiels"
+msgstr "Something went wrong creating the game"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:546
+#, elixir-autogen, elixir-format
+msgid "Fehler beim Erstellen des neuen Spiels."
+msgstr "Something went wrong creating the new game."
+
+#: lib/mimimi_web/live/game_live/play.ex:416
+#, elixir-autogen, elixir-format
+msgid "Fehler beim Laden der Runden. Bitte lade die Seite neu oder kontaktiere den Support."
+msgstr "Something went wrong loading the rounds. Please reload the page or contact support."
+
+#: lib/mimimi_web/live/game_live/play.ex:522
+#, elixir-autogen, elixir-format
+msgid "Fehler beim Speichern der Antwort."
+msgstr "Something went wrong saving your answer."
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:466
+#, elixir-autogen, elixir-format
+msgid "Fehler beim Starten des Spiels"
+msgstr "Something went wrong starting the game"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:556
+#, elixir-autogen, elixir-format
+msgid "Fehler beim Starten des neuen Spiels."
+msgstr "Something went wrong starting the new game."
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:499
+#, elixir-autogen, elixir-format
+msgid "Fehler beim Stoppen des Spiels"
+msgstr "Something went wrong stopping the game"
+
+#: lib/mimimi_web/live/game_live/play.ex:240
+#, elixir-autogen, elixir-format
+msgid "Fehler beim Vorbereiten der Runden. Bitte versuche es erneut."
+msgstr "Something went wrong preparing the rounds. Please try again."
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:205
+#, elixir-autogen, elixir-format
+msgid "Frei"
+msgstr "Free"
+
+#: lib/mimimi_web/components/layouts.ex:164
+#, elixir-autogen, elixir-format
+msgid "Gefördert durch:"
+msgstr "Funded by:"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1127
+#, elixir-autogen, elixir-format
+msgid "Genauigkeit: %{accuracy}%"
+msgstr "Accuracy: %{accuracy}%"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1098
+#, elixir-autogen, elixir-format
+msgid "Gesamt Genauigkeit"
+msgstr "Overall accuracy"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1089
+#, elixir-autogen, elixir-format
+msgid "Gespielte Runden"
+msgstr "Rounds played"
+
+#: lib/mimimi_web/live/home_live/index.ex:242
+#, elixir-autogen, elixir-format
+msgid "Gib deinen Einladungscode ein"
+msgstr "Enter your invitation code"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:658
+#, elixir-autogen, elixir-format
+msgid "Gib diesen Code ein auf"
+msgstr "Enter this code at"
+
+#: lib/mimimi_web/components/layouts.ex:146
+#, elixir-autogen, elixir-format
+msgid "Impressum"
+msgstr "Legal notice"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1247
+#, elixir-autogen, elixir-format
+msgid "Ja, beenden"
+msgstr "Yes, end it"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:721
+#, elixir-autogen, elixir-format
+msgid "Jetzt spielen!"
+msgstr "Play now!"
+
+#: lib/mimimi_web/live/game_live/play.ex:971
+#, elixir-autogen, elixir-format
+msgid "Keine Runde verfügbar"
+msgstr "No round available"
+
+#: lib/mimimi_web/live/list_words_live/index.ex:254
+#, elixir-autogen, elixir-format
+msgid "Keine Wörter mit Stichwörtern und Bildern gefunden"
+msgstr "No words with keywords and pictures found"
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:176
+#, elixir-autogen, elixir-format
+msgid "Klicke auf ein verfügbares Tier"
+msgstr "Tap an available animal"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:687
+#, elixir-autogen, elixir-format
+msgid "Kopiert!"
+msgstr "Copied!"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:846
+#, elixir-autogen, elixir-format
+msgid "Lehrkraft Dashboard"
+msgstr "Teacher dashboard"
+
+#: lib/mimimi_web/live/game_live/play.ex:856
+#, elixir-autogen, elixir-format
+msgid "Leider falsch"
+msgstr "Sorry, wrong"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:686
+#, elixir-autogen, elixir-format
+msgid "Link kopieren"
+msgstr "Copy link"
+
+#: lib/mimimi_web/live/list_words_live/index.ex:168
+#, elixir-autogen, elixir-format
+msgid "Mindestanzahl Stichwörter: %{count}"
+msgstr "Minimum number of keywords: %{count}"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:731
+#, elixir-autogen, elixir-format
+msgid "Mitspieler (%{count})"
+msgstr "Players (%{count})"
+
+#: lib/mimimi_web/live/home_live/index.ex:290
+#, elixir-autogen, elixir-format
+msgid "Neues Spiel"
+msgstr "New game"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1488
+#, elixir-autogen, elixir-format
+msgid "Neues Spiel mit denselben Spielern"
+msgstr "New game with the same players"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1496
+#, elixir-autogen, elixir-format
+msgid "Nicht alle Spieler sind noch online. Es werden nur die online Spieler mitgenommen."
+msgstr "Not all players are still online. Only the online players will join."
+
+#: lib/mimimi_web/live/home_live/index.ex:612
+#, elixir-autogen, elixir-format
+msgid "Nicht genug Wörter für die ausgewählte Spielfeldgröße verfügbar. Bitte wähle eine kleinere Spielfeldgröße oder andere Wortarten."
+msgstr "Not enough words for the chosen grid size. Please pick a smaller grid or different word types."
+
+#: lib/mimimi_web/live/home_live/index.ex:602
+#, elixir-autogen, elixir-format
+msgid "Nicht genug Wörter mit ausreichend Hinweisen für die ausgewählten Wortarten verfügbar. Bitte wähle andere Wortarten oder reduziere die Anzahl der Runden."
+msgstr "Not enough words with enough clues for the chosen word types. Please pick different word types or reduce the number of rounds."
+
+#: lib/mimimi_web/live/home_live/index.ex:460
+#, elixir-autogen, elixir-format
+msgid "Nomen"
+msgstr "Noun"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:523
+#, elixir-autogen, elixir-format
+msgid "Nur der Spielleiter kann ein neues Spiel starten."
+msgstr "Only the host can start a new game."
+
+#: lib/mimimi_web/live/game_live/play.ex:879
+#, elixir-autogen, elixir-format
+msgid "Nächste Runde beginnt..."
+msgstr "Next round is starting..."
+
+#: lib/mimimi_web/live/game_live/play.ex:660
+#, elixir-autogen, elixir-format
+msgid "Offline"
+msgstr "Offline"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1107
+#, elixir-autogen, elixir-format
+msgid "Richtig / Falsch"
+msgstr "Right / Wrong"
+
+#: lib/mimimi_web/live/game_live/play.ex:856
+#, elixir-autogen, elixir-format
+msgid "Richtig!"
+msgstr "Right!"
+
+#: lib/mimimi_web/live/game_live/play.ex:902
+#, elixir-autogen, elixir-format
+msgid "Richtige Antwort:"
+msgstr "Correct answer:"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:840
+#: lib/mimimi_web/live/game_live/play.ex:722
+#, elixir-autogen, elixir-format
+msgid "Runde %{position} von %{total}"
+msgstr "Round %{position} of %{total}"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1270
+#, elixir-autogen, elixir-format
+msgid "Runden werden generiert..."
+msgstr "Generating rounds..."
+
+#: lib/mimimi_web/live/game_live/play.ex:684
+#, elixir-autogen, elixir-format
+msgid "Runden werden vorbereitet..."
+msgstr "Preparing rounds..."
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:881
+#, elixir-autogen, elixir-format
+msgid "Schlüsselwörter"
+msgstr "Keywords"
+
+#: lib/mimimi_web/components/layouts.ex:90
+#, elixir-autogen, elixir-format
+msgid "Something went wrong!"
+msgstr ""
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:796
+#, elixir-autogen, elixir-format
+msgid "Spiel abbrechen"
+msgstr "Cancel game"
+
+#: lib/mimimi_web/live/home_live/index.ex:239
+#: lib/mimimi_web/live/home_live/index.ex:277
+#, elixir-autogen, elixir-format
+msgid "Spiel beitreten"
+msgstr "Join a game"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1317
+#, elixir-autogen, elixir-format
+msgid "Spiel fertig!"
+msgstr "Game over!"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1203
+#, elixir-autogen, elixir-format
+msgid "Spiel jetzt beenden"
+msgstr "End game now"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1262
+#, elixir-autogen, elixir-format
+msgid "Spiel wird vorbereitet..."
+msgstr "Preparing the game..."
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1223
+#, elixir-autogen, elixir-format
+msgid "Spiel wirklich beenden?"
+msgstr "Really end the game?"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:956
+#, elixir-autogen, elixir-format
+msgid "Spieler Auswahl"
+msgstr "Player picks"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1117
+#, elixir-autogen, elixir-format
+msgid "Spieler Statistiken"
+msgstr "Player statistics"
+
+#: lib/mimimi_web/live/home_live/index.ex:499
+#, elixir-autogen, elixir-format
+msgid "Spielfeld Größe"
+msgstr "Grid size"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1259
+#, elixir-autogen, elixir-format
+msgid "Spielleiter Dashboard"
+msgstr "Host dashboard"
+
+#: lib/mimimi_web/components/layouts.ex:149
+#: lib/mimimi_web/live/home_live/index.ex:411
+#, elixir-autogen, elixir-format
+msgid "Sprache"
+msgstr "Language"
+
+#: lib/mimimi_web/live/list_words_live/index.ex:236
+#, elixir-autogen, elixir-format
+msgid "Stichwörter:"
+msgstr "Keywords:"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1408
+#, elixir-autogen, elixir-format
+msgid "Super!"
+msgstr "Great!"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:46
+#, elixir-autogen, elixir-format
+msgid "Unberechtigter Zugriff."
+msgstr "You are not allowed to view this."
+
+#: lib/mimimi_web/live/home_live/index.ex:468
+#, elixir-autogen, elixir-format
+msgid "Verb"
+msgstr "Verb"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:742
+#, elixir-autogen, elixir-format
+msgid "Warte auf Spieler..."
+msgstr "Waiting for players..."
+
+#: lib/mimimi_web/live/game_live/play.ex:604
+#, elixir-autogen, elixir-format
+msgid "Warte auf Spielstart..."
+msgstr "Waiting for the game to start..."
+
+#: lib/mimimi_web/live/game_live/play.ex:932
+#, elixir-autogen, elixir-format
+msgid "Warte auf andere Spieler..."
+msgstr "Waiting for other players..."
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1030
+#, elixir-autogen, elixir-format
+msgid "Wartet auf Antwort..."
+msgstr "Waiting for an answer..."
+
+#: lib/mimimi_web/components/layouts.ex:78
+#, elixir-autogen, elixir-format
+msgid "We can't find the internet"
+msgstr ""
+
+#: lib/mimimi_web/live/game_live/play.ex:728
+#, elixir-autogen, elixir-format
+msgid "Welches Wort ist richtig?"
+msgstr "Which word is right?"
+
+#: lib/mimimi_web/live/game_live/play.ex:707
+#, elixir-autogen, elixir-format
+msgid "Wenn dieser Bildschirm länger als 10 Sekunden angezeigt wird, bitte die Seite neu laden oder den Entwickler kontaktieren."
+msgstr "If this screen shows for more than 10 seconds, please reload the page or contact the developer."
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1320
+#, elixir-autogen, elixir-format
+msgid "Wer hat gewonnen?"
+msgstr "Who won?"
+
+#: lib/mimimi_web/live/game_live/play.ex:620
+#, elixir-autogen, elixir-format
+msgid "Wer spielt mit?"
+msgstr "Who's playing?"
+
+#: lib/mimimi_web/live/home_live/index.ex:338
+#, elixir-autogen, elixir-format
+msgid "Wie viele Runden?"
+msgstr "How many rounds?"
+
+#: lib/mimimi_web/live/home_live/index.ex:441
+#, elixir-autogen, elixir-format
+msgid "Wortarten (optional)"
+msgstr "Word types (optional)"
+
+#: lib/mimimi_web/live/avatar_live/choose.ex:173
+#, elixir-autogen, elixir-format
+msgid "Wähle dein Tier"
+msgstr "Choose your animal"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:776
+#: lib/mimimi_web/live/game_live/play.ex:673
+#, elixir-autogen, elixir-format
+msgid "Wählt..."
+msgstr "Choosing..."
+
+#: lib/mimimi_web/live/list_words_live/index.ex:199
+#, elixir-autogen, elixir-format
+msgid "Wörter geladen"
+msgstr "words loaded"
+
+#: lib/mimimi_web/live/home_live/index.ex:213
+#, elixir-autogen, elixir-format
+msgid "Wörter-Ratespiel"
+msgstr "Word guessing game"
+
+#: lib/mimimi_web/live/list_words_live/index.ex:158
+#, elixir-autogen, elixir-format
+msgid "Wörterliste"
+msgstr "Word list"
+
+#: lib/mimimi_web/live/home_live/index.ex:352
+#, elixir-autogen, elixir-format
+msgid "Zeit für Hinweise"
+msgstr "Time between clues"
+
+#: lib/mimimi_web/live/dashboard_live/show.ex:1512
+#, elixir-autogen, elixir-format
+msgid "Zurück zur Startseite"
+msgstr "Back to the start page"
+
+#: lib/mimimi_web/components/core_components.ex:74
+#, elixir-autogen, elixir-format
+msgid "close"
+msgstr ""
+
+#: lib/mimimi_web/live/home_live/index.ex:219
+#, elixir-autogen, elixir-format
+msgid "oder"
+msgstr "or"
+
+#: lib/mimimi_web/live/list_words_live/index.ex:196
+#, elixir-autogen, elixir-format
+msgid "von"
+msgstr "of"

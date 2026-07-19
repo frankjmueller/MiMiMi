@@ -17,7 +17,7 @@ defmodule MimimiWeb.AvatarLive.Choose do
         %{state: state} when state in ["waiting_for_players", "game_running"] ->
           {:ok,
            socket
-           |> put_flash(:error, "Du bist bereits in einem aktiven Spiel.")
+           |> put_flash(:error, gettext("Du bist bereits in einem aktiven Spiel."))
            |> push_navigate(to: ~p"/")}
 
         _ ->
@@ -52,37 +52,37 @@ defmodule MimimiWeb.AvatarLive.Choose do
       {:error, :not_found} ->
         {:ok,
          socket
-         |> put_flash(:error, "Dieser Link geht nicht.")
+         |> put_flash(:error, gettext("Dieser Link geht nicht."))
          |> push_navigate(to: ~p"/")}
 
       {:error, :expired} ->
         {:ok,
          socket
-         |> put_flash(:error, "Dieser Link ist abgelaufen.")
+         |> put_flash(:error, gettext("Dieser Link ist abgelaufen."))
          |> push_navigate(to: ~p"/")}
 
       {:error, :already_started} ->
         {:ok,
          socket
-         |> put_flash(:error, "Das Spiel hat schon angefangen.")
+         |> put_flash(:error, gettext("Das Spiel hat schon angefangen."))
          |> push_navigate(to: ~p"/")}
 
       {:error, :game_over} ->
         {:ok,
          socket
-         |> put_flash(:error, "Das Spiel ist schon fertig.")
+         |> put_flash(:error, gettext("Das Spiel ist schon fertig."))
          |> push_navigate(to: ~p"/")}
 
       {:error, :lobby_timeout} ->
         {:ok,
          socket
-         |> put_flash(:error, "Das Spiel ist zu Ende. Es hat zu lange gedauert.")
+         |> put_flash(:error, gettext("Das Spiel ist zu Ende. Es hat zu lange gedauert."))
          |> push_navigate(to: ~p"/")}
 
       {:error, :host_disconnected} ->
         {:ok,
          socket
-         |> put_flash(:error, "Der Gastgeber hat die Verbindung verloren.")
+         |> put_flash(:error, gettext("Der Gastgeber hat die Verbindung verloren."))
          |> push_navigate(to: ~p"/")}
     end
   end
@@ -106,13 +106,13 @@ defmodule MimimiWeb.AvatarLive.Choose do
         {:error, _} ->
           {:noreply,
            socket
-           |> put_flash(:error, "Dieses Tier ist schon besetzt.")
+           |> put_flash(:error, gettext("Dieses Tier ist schon besetzt."))
            |> assign(:avatars, Games.list_available_avatars(game.id))}
       end
     else
       {:noreply,
        socket
-       |> put_flash(:error, "Dieses Tier ist schon besetzt.")
+       |> put_flash(:error, gettext("Dieses Tier ist schon besetzt."))
        |> assign(:avatars, Games.list_available_avatars(game.id))}
     end
   end
@@ -142,14 +142,14 @@ defmodule MimimiWeb.AvatarLive.Choose do
   def handle_info(:lobby_timeout, socket) do
     {:noreply,
      socket
-     |> put_flash(:error, "Das Spiel ist zu Ende. Es hat zu lange gedauert.")
+     |> put_flash(:error, gettext("Das Spiel ist zu Ende. Es hat zu lange gedauert."))
      |> push_navigate(to: ~p"/")}
   end
 
   def handle_info(:host_disconnected, socket) do
     {:noreply,
      socket
-     |> put_flash(:error, "Der Gastgeber hat die Verbindung verloren.")
+     |> put_flash(:error, gettext("Der Gastgeber hat die Verbindung verloren."))
      |> push_navigate(to: ~p"/")}
   end
 
@@ -170,10 +170,10 @@ defmodule MimimiWeb.AvatarLive.Choose do
       <div class="w-full max-w-3xl">
         <div class="text-center mb-10">
           <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Wähle dein Tier
+            {gettext("Wähle dein Tier")}
           </h1>
           <p class="text-gray-500 dark:text-gray-400 text-sm">
-            Klicke auf ein verfügbares Tier
+            {gettext("Klicke auf ein verfügbares Tier")}
           </p>
         </div>
 
@@ -202,11 +202,11 @@ defmodule MimimiWeb.AvatarLive.Choose do
                 <span class="relative">{avatar}</span>
                 <%= if available do %>
                   <span class="relative text-xs font-semibold text-green-600 dark:text-green-400 mt-2">
-                    Frei
+                    {gettext("Frei")}
                   </span>
                 <% else %>
                   <span class="relative text-xs font-semibold text-red-600 dark:text-red-400 mt-2">
-                    Besetzt
+                    {gettext("Besetzt")}
                   </span>
                   <div class="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
                     <.icon name="hero-x-mark" class="w-12 h-12 text-red-500" />

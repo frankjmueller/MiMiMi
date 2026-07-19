@@ -6,6 +6,7 @@ defmodule MimimiWeb.GameComponents do
   including leaderboards, word cards, and player grids.
   """
   use Phoenix.Component
+  use Gettext, backend: MimimiWeb.Gettext
   import MimimiWeb.CoreComponents
 
   @doc """
@@ -128,7 +129,7 @@ defmodule MimimiWeb.GameComponents do
           {player.name}
         </div>
         <div :if={Map.has_key?(player, :points)} class="text-xs text-purple-600 dark:text-purple-400">
-          {player.points} Punkte
+          {ngettext("%{count} Punkt", "%{count} Punkte", player.points)}
         </div>
       </div>
     </div>

@@ -155,17 +155,17 @@ defmodule MimimiWeb.ListWordsLive.Index do
       <div class="w-full max-w-6xl mx-auto">
         <div class="text-center mb-10">
           <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Wörterliste
+            {gettext("Wörterliste")}
           </h1>
           <p class="text-gray-500 dark:text-gray-400 text-sm">
-            Alle Wörter mit Stichwörtern und Bildern
+            {gettext("Alle Wörter mit Stichwörtern und Bildern")}
           </p>
         </div>
 
         <div class="mb-8 max-w-md mx-auto">
           <.glass_card class="p-6">
             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-              Mindestanzahl Stichwörter: {@min_keywords}
+              {gettext("Mindestanzahl Stichwörter: %{count}", count: @min_keywords)}
             </label>
             <form phx-change="filter_change" phx-debounce="300">
               <div class="relative group">
@@ -193,10 +193,10 @@ defmodule MimimiWeb.ListWordsLive.Index do
           <p class="text-lg text-gray-600 dark:text-gray-400">
             <span class="font-semibold text-purple-600 dark:text-purple-400">{@loaded_count}</span>
             <%= if @total_count > 0 do %>
-              von
+              {gettext("von")}
               <span class="font-semibold text-purple-600 dark:text-purple-400">{@total_count}</span>
             <% end %>
-            Wörter geladen
+            {gettext("Wörter geladen")}
           </p>
           <%= if @loading do %>
             <.progress_bar
@@ -233,7 +233,7 @@ defmodule MimimiWeb.ListWordsLive.Index do
 
             <div class="space-y-2">
               <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                Stichwörter:
+                {gettext("Stichwörter:")}
               </h3>
               <div class="flex flex-wrap gap-2">
                 <span
@@ -251,7 +251,7 @@ defmodule MimimiWeb.ListWordsLive.Index do
           <.glass_card class="p-12">
             <div class="text-6xl mb-4 opacity-50">📭</div>
             <p class="text-xl text-gray-600 dark:text-gray-400">
-              Keine Wörter mit Stichwörtern und Bildern gefunden
+              {gettext("Keine Wörter mit Stichwörtern und Bildern gefunden")}
             </p>
           </.glass_card>
         </div>

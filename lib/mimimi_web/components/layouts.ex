@@ -155,15 +155,17 @@ defmodule MimimiWeb.Layouts do
 
           <div class="flex items-center gap-3">
             <div class="text-gray-600 dark:text-gray-400">
-              Aktive Spiele:
+              {gettext("Aktive Spiele:")}
               <span class="font-bold text-purple-600 dark:text-purple-400">{@active_games}</span>
             </div>
             <div class="hidden sm:block text-gray-300 dark:text-gray-600">•</div>
             <div class="flex items-center gap-2">
-              <span class="text-xs text-gray-500 dark:text-gray-500">Gefördert durch:</span>
+              <span class="text-xs text-gray-500 dark:text-gray-500">
+                {gettext("Gefördert durch:")}
+              </span>
               <img
                 src={~p"/images/BMBFSFJ_de_v1__Web_farbig.webp"}
-                alt="Bundesministerium für Familie, Senioren, Frauen und Jugend"
+                alt={gettext("Bundesministerium für Familie, Senioren, Frauen und Jugend")}
                 class="h-24 w-auto"
               />
             </div>

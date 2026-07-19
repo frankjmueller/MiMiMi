@@ -6,6 +6,8 @@ defmodule MimimiWeb.GameHelpers do
   such as validating active games and redirecting users appropriately.
   """
 
+  use Gettext, backend: MimimiWeb.Gettext
+
   alias Mimimi.Games
 
   @doc """
@@ -49,14 +51,19 @@ defmodule MimimiWeb.GameHelpers do
   @doc """
   Returns a human-readable error message for game invitation errors.
   """
-  def invitation_error_message(:not_found), do: "Dieser Code existiert nicht."
-  def invitation_error_message(:expired), do: "Dieser Code ist abgelaufen."
-  def invitation_error_message(:already_started), do: "Dieses Spiel hat bereits begonnen."
-  def invitation_error_message(:game_over), do: "Dieses Spiel ist bereits beendet."
+  def invitation_error_message(:not_found), do: gettext("Dieser Code existiert nicht.")
+  def invitation_error_message(:expired), do: gettext("Dieser Code ist abgelaufen.")
+
+  def invitation_error_message(:already_started),
+    do: gettext("Dieses Spiel hat bereits begonnen.")
+
+  def invitation_error_message(:game_over), do: gettext("Dieses Spiel ist bereits beendet.")
 
   def invitation_error_message(:lobby_timeout),
-    do: "Die Lobby-Zeit für dieses Spiel ist abgelaufen."
+    do: gettext("Die Lobby-Zeit für dieses Spiel ist abgelaufen.")
 
-  def invitation_error_message(:host_disconnected), do: "Der Host hat das Spiel verlassen."
-  def invitation_error_message(_), do: "Ein Fehler ist aufgetreten."
+  def invitation_error_message(:host_disconnected),
+    do: gettext("Der Host hat das Spiel verlassen.")
+
+  def invitation_error_message(_), do: gettext("Ein Fehler ist aufgetreten.")
 end

@@ -195,7 +195,7 @@ defmodule MimimiWeb.HomeLive.Index do
       {:error, _changeset} ->
         {:noreply,
          socket
-         |> put_flash(:error, "Fehler beim Erstellen des Spiels")
+         |> put_flash(:error, gettext("Fehler beim Erstellen des Spiels"))
          |> assign(:form, to_form(game_params, as: :game))}
     end
   end
@@ -210,13 +210,13 @@ defmodule MimimiWeb.HomeLive.Index do
             MiMiMi
           </h1>
           <p class="text-gray-500 dark:text-gray-400 text-sm">
-            Wörter-Ratespiel
+            {gettext("Wörter-Ratespiel")}
           </p>
         </div>
 
         <%= if @has_waiting_games do %>
           <.render_join_game_section form={@invite_form} error={@invite_error} />
-          <.divider_with_text text="oder" />
+          <.divider_with_text text={gettext("oder")} />
         <% end %>
 
         <.render_create_game_section
@@ -236,10 +236,10 @@ defmodule MimimiWeb.HomeLive.Index do
       <div class="text-center mb-6">
         <.gradient_icon_badge icon="🎯" gradient="from-green-500 to-emerald-500" />
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-          Spiel beitreten
+          {gettext("Spiel beitreten")}
         </h2>
         <p class="text-gray-600 dark:text-gray-400 text-sm">
-          Gib deinen Einladungscode ein
+          {gettext("Gib deinen Einladungscode ein")}
         </p>
       </div>
 
@@ -274,7 +274,7 @@ defmodule MimimiWeb.HomeLive.Index do
           hover_shadow_color="shadow-green-500/40"
           class="text-lg"
         >
-          Spiel beitreten
+          {gettext("Spiel beitreten")}
         </.gradient_button>
       </.form>
     </.glass_card>
@@ -287,10 +287,10 @@ defmodule MimimiWeb.HomeLive.Index do
       <div class="text-center mb-6">
         <.gradient_icon_badge icon="✨" />
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-          Neues Spiel
+          {gettext("Neues Spiel")}
         </h2>
         <p class="text-gray-600 dark:text-gray-400 text-sm">
-          Erstelle ein neues Spiel
+          {gettext("Erstelle ein neues Spiel")}
         </p>
       </div>
 
@@ -323,7 +323,7 @@ defmodule MimimiWeb.HomeLive.Index do
               "!bg-gray-300 dark:!bg-gray-700 !text-gray-500 !cursor-not-allowed !opacity-60 !shadow-none hover:!scale-100"
           ]}
         >
-          Einladungslink generieren
+          {gettext("Einladungslink generieren")}
         </.gradient_button>
       </.form>
     </.glass_card>
@@ -335,7 +335,7 @@ defmodule MimimiWeb.HomeLive.Index do
     <div class="grid grid-cols-2 gap-3">
       <div class="space-y-2">
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-          Wie viele Runden?
+          {gettext("Wie viele Runden?")}
         </label>
         <.glass_input
           type="number"
@@ -349,7 +349,7 @@ defmodule MimimiWeb.HomeLive.Index do
 
       <div class="space-y-2">
         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-          Zeit für Hinweise
+          {gettext("Zeit für Hinweise")}
         </label>
         <div class="relative group">
           <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300">
@@ -358,21 +358,39 @@ defmodule MimimiWeb.HomeLive.Index do
             name="game[clues_interval]"
             class="relative w-full text-lg px-4 py-3.5 bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-purple-500 dark:focus:border-purple-400 focus:ring-4 focus:ring-purple-100 dark:focus:ring-purple-900/30 transition-all duration-200 dark:text-white outline-none cursor-pointer appearance-none"
           >
-            <option value="3" selected={@form[:clues_interval].value == "3"}>3 Sek.</option>
-            <option value="6" selected={@form[:clues_interval].value == "6"}>6 Sek.</option>
+            <option value="3" selected={@form[:clues_interval].value == "3"}>
+              {gettext("%{count} Sek.", count: 3)}
+            </option>
+            <option value="6" selected={@form[:clues_interval].value == "6"}>
+              {gettext("%{count} Sek.", count: 6)}
+            </option>
             <option
               value="9"
               selected={@form[:clues_interval].value == "9" || !@form[:clues_interval].value}
             >
-              9 Sek.
+              {gettext("%{count} Sek.", count: 9)}
             </option>
-            <option value="10" selected={@form[:clues_interval].value == "10"}>10 Sek.</option>
-            <option value="12" selected={@form[:clues_interval].value == "12"}>12 Sek.</option>
-            <option value="15" selected={@form[:clues_interval].value == "15"}>15 Sek.</option>
-            <option value="20" selected={@form[:clues_interval].value == "20"}>20 Sek.</option>
-            <option value="30" selected={@form[:clues_interval].value == "30"}>30 Sek.</option>
-            <option value="45" selected={@form[:clues_interval].value == "45"}>45 Sek.</option>
-            <option value="60" selected={@form[:clues_interval].value == "60"}>60 Sek.</option>
+            <option value="10" selected={@form[:clues_interval].value == "10"}>
+              {gettext("%{count} Sek.", count: 10)}
+            </option>
+            <option value="12" selected={@form[:clues_interval].value == "12"}>
+              {gettext("%{count} Sek.", count: 12)}
+            </option>
+            <option value="15" selected={@form[:clues_interval].value == "15"}>
+              {gettext("%{count} Sek.", count: 15)}
+            </option>
+            <option value="20" selected={@form[:clues_interval].value == "20"}>
+              {gettext("%{count} Sek.", count: 20)}
+            </option>
+            <option value="30" selected={@form[:clues_interval].value == "30"}>
+              {gettext("%{count} Sek.", count: 30)}
+            </option>
+            <option value="45" selected={@form[:clues_interval].value == "45"}>
+              {gettext("%{count} Sek.", count: 45)}
+            </option>
+            <option value="60" selected={@form[:clues_interval].value == "60"}>
+              {gettext("%{count} Sek.", count: 60)}
+            </option>
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -390,7 +408,7 @@ defmodule MimimiWeb.HomeLive.Index do
     ~H"""
     <div class="space-y-2">
       <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-        Sprache
+        {gettext("Sprache")}
       </label>
       <div class="relative group">
         <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300">
@@ -420,7 +438,7 @@ defmodule MimimiWeb.HomeLive.Index do
     <details class="group/details" id="word-types-details">
       <summary class="flex items-center justify-between cursor-pointer list-none px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 transition-all duration-200">
         <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-          Wortarten (optional)
+          {gettext("Wortarten (optional)")}
         </span>
         <svg
           class="w-5 h-5 text-gray-500 transition-transform duration-200 group-open/details:rotate-180"
@@ -439,7 +457,7 @@ defmodule MimimiWeb.HomeLive.Index do
             name="game[word_types][]"
             value="Noun"
             checked={"Noun" in (@form[:word_types].value || [])}
-            label="Nomen"
+            label={gettext("Nomen")}
           />
 
           <.checkbox_button
@@ -447,7 +465,7 @@ defmodule MimimiWeb.HomeLive.Index do
             name="game[word_types][]"
             value="Verb"
             checked={"Verb" in (@form[:word_types].value || [])}
-            label="Verb"
+            label={gettext("Verb")}
             gradient="from-blue-500 to-cyan-500"
           />
 
@@ -456,7 +474,7 @@ defmodule MimimiWeb.HomeLive.Index do
             name="game[word_types][]"
             value="Adjective"
             checked={"Adjective" in (@form[:word_types].value || [])}
-            label="Adjektiv"
+            label={gettext("Adjektiv")}
             gradient="from-green-500 to-emerald-500"
           />
 
@@ -465,7 +483,7 @@ defmodule MimimiWeb.HomeLive.Index do
             name="game[word_types][]"
             value="Adverb"
             checked={"Adverb" in (@form[:word_types].value || [])}
-            label="Adverb"
+            label={gettext("Adverb")}
             gradient="from-yellow-500 to-orange-500"
           />
         </div>
@@ -478,7 +496,7 @@ defmodule MimimiWeb.HomeLive.Index do
     ~H"""
     <div class="space-y-3">
       <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-        Spielfeld Größe
+        {gettext("Spielfeld Größe")}
       </label>
       <div class="grid grid-cols-2 gap-3">
         <.radio_button
@@ -516,14 +534,14 @@ defmodule MimimiWeb.HomeLive.Index do
     """
   end
 
-  defp validate_code_presence(""), do: {:error, "Bitte gib einen Einladungscode ein"}
+  defp validate_code_presence(""), do: {:error, gettext("Bitte gib einen Einladungscode ein")}
   defp validate_code_presence(_code), do: :ok
 
   defp validate_code_length(code) do
     if String.length(code) == 6 do
       :ok
     else
-      {:error, "Der Code muss 6 Ziffern haben"}
+      {:error, gettext("Der Code muss 6 Ziffern haben")}
     end
   end
 
@@ -562,7 +580,7 @@ defmodule MimimiWeb.HomeLive.Index do
       socket
       |> assign(
         :words_error,
-        "Bitte wähle mindestens eine Wortart aus, um ein Spiel zu erstellen."
+        gettext("Bitte wähle mindestens eine Wortart aus, um ein Spiel zu erstellen.")
       )
       |> assign(:can_create_game, false)
     else
@@ -581,7 +599,9 @@ defmodule MimimiWeb.HomeLive.Index do
           socket
           |> assign(
             :words_error,
-            "Nicht genug Wörter mit ausreichend Hinweisen für die ausgewählten Wortarten verfügbar. Bitte wähle andere Wortarten oder reduziere die Anzahl der Runden."
+            gettext(
+              "Nicht genug Wörter mit ausreichend Hinweisen für die ausgewählten Wortarten verfügbar. Bitte wähle andere Wortarten oder reduziere die Anzahl der Runden."
+            )
           )
           |> assign(:can_create_game, false)
 
@@ -589,7 +609,9 @@ defmodule MimimiWeb.HomeLive.Index do
           socket
           |> assign(
             :words_error,
-            "Nicht genug Wörter für die ausgewählte Spielfeldgröße verfügbar. Bitte wähle eine kleinere Spielfeldgröße oder andere Wortarten."
+            gettext(
+              "Nicht genug Wörter für die ausgewählte Spielfeldgröße verfügbar. Bitte wähle eine kleinere Spielfeldgröße oder andere Wortarten."
+            )
           )
           |> assign(:can_create_game, false)
       end

@@ -27,12 +27,12 @@ defmodule MimimiWeb.GameLive.Play do
       cond do
         is_nil(player) ->
           socket
-          |> put_flash(:error, "Du bist nicht in diesem Spiel.")
+          |> put_flash(:error, gettext("Du bist nicht in diesem Spiel."))
           |> push_navigate(to: ~p"/")
 
         game.state in ["host_disconnected", "game_over"] ->
           socket
-          |> put_flash(:error, "Das Spiel ist nicht mehr aktiv.")
+          |> put_flash(:error, gettext("Das Spiel ist nicht mehr aktiv."))
           |> push_navigate(to: ~p"/")
 
         true ->
@@ -235,14 +235,17 @@ defmodule MimimiWeb.GameLive.Play do
   def handle_info(:round_generation_failed, socket) do
     {:noreply,
      socket
-     |> put_flash(:error, "Fehler beim Vorbereiten der Runden. Bitte versuche es erneut.")
+     |> put_flash(
+       :error,
+       gettext("Fehler beim Vorbereiten der Runden. Bitte versuche es erneut.")
+     )
      |> push_navigate(to: ~p"/")}
   end
 
   def handle_info(:lobby_timeout, socket) do
     {:noreply,
      socket
-     |> put_flash(:error, "Das Spiel ist zu Ende. Es hat zu lange gedauert.")
+     |> put_flash(:error, gettext("Das Spiel ist zu Ende. Es hat zu lange gedauert."))
      |> push_navigate(to: ~p"/")}
   end
 
@@ -410,7 +413,9 @@ defmodule MimimiWeb.GameLive.Play do
            socket
            |> put_flash(
              :error,
-             "Fehler beim Laden der Runden. Bitte lade die Seite neu oder kontaktiere den Support."
+             gettext(
+               "Fehler beim Laden der Runden. Bitte lade die Seite neu oder kontaktiere den Support."
+             )
            )
            |> assign(:rounds_loading, false)}
 
@@ -437,21 +442,24 @@ defmodule MimimiWeb.GameLive.Play do
   def handle_info(:host_disconnected, socket) do
     {:noreply,
      socket
-     |> put_flash(:error, "Der Spielleiter hat die Verbindung getrennt. Das Spiel wurde beendet.")
+     |> put_flash(
+       :error,
+       gettext("Der Spielleiter hat die Verbindung getrennt. Das Spiel wurde beendet.")
+     )
      |> push_navigate(to: ~p"/")}
   end
 
   def handle_info(:game_stopped_by_host, socket) do
     {:noreply,
      socket
-     |> put_flash(:info, "Das Spiel wurde vom Spielleiter beendet.")
+     |> put_flash(:info, gettext("Das Spiel wurde vom Spielleiter beendet."))
      |> push_navigate(to: ~p"/dashboard/#{socket.assigns.game.id}")}
   end
 
   def handle_info({:new_game_started, new_game_id}, socket) do
     {:noreply,
      socket
-     |> put_flash(:info, "Ein neues Spiel wurde gestartet!")
+     |> put_flash(:info, gettext("Ein neues Spiel wurde gestartet!"))
      |> push_navigate(to: ~p"/games/#{new_game_id}/current")}
   end
 
@@ -511,7 +519,7 @@ defmodule MimimiWeb.GameLive.Play do
       {:error, _reason} ->
         {:noreply,
          socket
-         |> put_flash(:error, "Fehler beim Speichern der Antwort.")}
+         |> put_flash(:error, gettext("Fehler beim Speichern der Antwort."))}
     end
   end
 
@@ -593,7 +601,7 @@ defmodule MimimiWeb.GameLive.Play do
     ~H"""
     <div class="text-center mb-10">
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-        Warte auf Spielstart...
+        {gettext("Warte auf Spielstart...")}
       </h1>
     </div>
 
@@ -602,17 +610,17 @@ defmodule MimimiWeb.GameLive.Play do
       <div class="text-center mb-8 pb-8 border-b border-gray-200 dark:border-gray-700">
         <.gradient_icon_badge icon={@player.avatar} size="lg" class="w-24 h-24 mb-4 animate-pulse" />
         <p class="text-xl font-semibold text-gray-900 dark:text-white">
-          Du bist dabei!
+          {gettext("Du bist dabei!")}
         </p>
       </div>
 
       <%!-- Other players --%>
       <div>
         <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white text-center">
-          Wer spielt mit?
+          {gettext("Wer spielt mit?")}
           <%= if MapSet.size(@pending_players) > 0 do %>
             <span class="text-sm font-normal text-purple-600 dark:text-purple-400">
-              (+ {MapSet.size(@pending_players)} wählt Avatar...)
+              {gettext("(+ %{count} wählt Avatar...)", count: MapSet.size(@pending_players))}
             </span>
           <% end %>
         </h2>
@@ -649,7 +657,7 @@ defmodule MimimiWeb.GameLive.Play do
           ✕
         </div>
         <span class="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs py-1 text-center font-semibold">
-          Offline
+          {gettext("Offline")}
         </span>
       <% end %>
     </div>
@@ -662,7 +670,7 @@ defmodule MimimiWeb.GameLive.Play do
     <div class="relative flex flex-col items-center justify-center p-3 border-2 border-dashed border-purple-400 dark:border-purple-500 rounded-2xl bg-purple-50/50 dark:bg-purple-900/20 backdrop-blur-sm animate-pulse aspect-square">
       <span class="text-6xl mb-1">❓</span>
       <span class="text-xs text-center text-purple-600 dark:text-purple-400 font-medium leading-tight">
-        Wählt...
+        {gettext("Wählt...")}
       </span>
     </div>
     """
@@ -673,10 +681,10 @@ defmodule MimimiWeb.GameLive.Play do
     ~H"""
     <div class="text-center mb-10">
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-        Runden werden vorbereitet...
+        {gettext("Runden werden vorbereitet...")}
       </h1>
       <p class="text-gray-500 dark:text-gray-400 text-sm">
-        Einen Moment bitte
+        {gettext("Einen Moment bitte")}
       </p>
     </div>
 
@@ -696,8 +704,9 @@ defmodule MimimiWeb.GameLive.Play do
             </p>
           <% end %>
           <p class="mt-2 text-xs text-gray-500 dark:text-gray-500">
-            Wenn dieser Bildschirm länger als 10 Sekunden angezeigt wird,
-            bitte die Seite neu laden oder den Entwickler kontaktieren.
+            {gettext(
+              "Wenn dieser Bildschirm länger als 10 Sekunden angezeigt wird, bitte die Seite neu laden oder den Entwickler kontaktieren."
+            )}
           </p>
         </div>
       </div>
@@ -710,10 +719,13 @@ defmodule MimimiWeb.GameLive.Play do
     ~H"""
     <div class="text-center mb-8">
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-        Runde {@current_round.position} von {@game.rounds_count}
+        {gettext("Runde %{position} von %{total}",
+          position: @current_round.position,
+          total: @game.rounds_count
+        )}
       </h1>
       <p class="text-lg text-gray-600 dark:text-gray-400">
-        Welches Wort ist richtig?
+        {gettext("Welches Wort ist richtig?")}
       </p>
     </div>
 
@@ -917,7 +929,7 @@ defmodule MimimiWeb.GameLive.Play do
   defp render_waiting_for_others_section(assigns) do
     ~H"""
     <p class="text-gray-600 dark:text-gray-400 mb-6">
-      Warte auf andere Spieler...
+      {gettext("Warte auf andere Spieler...")}
     </p>
 
     <div class="max-w-md mx-auto mb-6">
@@ -956,7 +968,7 @@ defmodule MimimiWeb.GameLive.Play do
     <div class="text-center py-12">
       <div class="text-6xl mb-4">⚠️</div>
       <p class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-        Keine Runde verfügbar
+        {gettext("Keine Runde verfügbar")}
       </p>
     </div>
     """

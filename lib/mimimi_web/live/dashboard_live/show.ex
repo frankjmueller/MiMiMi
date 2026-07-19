@@ -43,7 +43,7 @@ defmodule MimimiWeb.DashboardLive.Show do
          socket
          |> put_flash(
            :error,
-           "Unberechtigter Zugriff."
+           gettext("Unberechtigter Zugriff.")
          )
          |> push_navigate(to: ~p"/")}
     end
@@ -225,7 +225,7 @@ defmodule MimimiWeb.DashboardLive.Show do
         Games.broadcast_to_game(game.id, :lobby_timeout)
 
         socket
-        |> put_flash(:error, "Das Spiel ist zu Ende. Es hat zu lange gedauert.")
+        |> put_flash(:error, gettext("Das Spiel ist zu Ende. Es hat zu lange gedauert."))
         |> push_navigate(to: ~p"/")
       else
         Process.send_after(self(), :lobby_tick, 1000)
@@ -297,21 +297,24 @@ defmodule MimimiWeb.DashboardLive.Show do
   def handle_info(:lobby_timeout, socket) do
     {:noreply,
      socket
-     |> put_flash(:error, "Das Spiel ist zu Ende. Es hat zu lange gedauert.")
+     |> put_flash(:error, gettext("Das Spiel ist zu Ende. Es hat zu lange gedauert."))
      |> push_navigate(to: ~p"/")}
   end
 
   def handle_info(:game_cancelled, socket) do
     {:noreply,
      socket
-     |> put_flash(:info, "Das Spiel wurde abgebrochen.")
+     |> put_flash(:info, gettext("Das Spiel wurde abgebrochen."))
      |> push_navigate(to: ~p"/")}
   end
 
   def handle_info(:round_generation_failed, socket) do
     {:noreply,
      socket
-     |> put_flash(:error, "Fehler beim Erstellen der Spielrunden. Bitte versuche es erneut.")
+     |> put_flash(
+       :error,
+       gettext("Fehler beim Erstellen der Spielrunden. Bitte versuche es erneut.")
+     )
      |> push_navigate(to: ~p"/")}
   end
 
@@ -422,7 +425,7 @@ defmodule MimimiWeb.DashboardLive.Show do
     if socket.assigns.game.host_user_id != socket.assigns.current_user.id do
       {:noreply,
        socket
-       |> put_flash(:info, "Ein neues Spiel wurde gestartet!")
+       |> put_flash(:info, gettext("Ein neues Spiel wurde gestartet!"))
        |> push_navigate(to: ~p"/games/#{new_game_id}/current")}
     else
       {:noreply, socket}
@@ -460,10 +463,10 @@ defmodule MimimiWeb.DashboardLive.Show do
           {:noreply, socket}
 
         {:error, _} ->
-          {:noreply, put_flash(socket, :error, "Fehler beim Starten des Spiels")}
+          {:noreply, put_flash(socket, :error, gettext("Fehler beim Starten des Spiels"))}
       end
     else
-      {:noreply, put_flash(socket, :error, "Du brauchst mehr Spieler.")}
+      {:noreply, put_flash(socket, :error, gettext("Du brauchst mehr Spieler."))}
     end
   end
 
@@ -480,7 +483,7 @@ defmodule MimimiWeb.DashboardLive.Show do
         {:noreply, socket}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Fehler beim Abbrechen des Spiels")}
+        {:noreply, put_flash(socket, :error, gettext("Fehler beim Abbrechen des Spiels"))}
     end
   end
 
@@ -493,7 +496,7 @@ defmodule MimimiWeb.DashboardLive.Show do
         {:noreply, socket}
 
       {:error, _} ->
-        {:noreply, put_flash(socket, :error, "Fehler beim Stoppen des Spiels")}
+        {:noreply, put_flash(socket, :error, gettext("Fehler beim Stoppen des Spiels"))}
     end
   end
 
@@ -516,7 +519,8 @@ defmodule MimimiWeb.DashboardLive.Show do
     current_user = socket.assigns.current_user
 
     if game.host_user_id != current_user.id do
-      {:noreply, put_flash(socket, :error, "Nur der Spielleiter kann ein neues Spiel starten.")}
+      {:noreply,
+       put_flash(socket, :error, gettext("Nur der Spielleiter kann ein neues Spiel starten."))}
     else
       socket = create_and_start_new_game(socket)
       {:noreply, socket}
@@ -539,7 +543,7 @@ defmodule MimimiWeb.DashboardLive.Show do
         start_new_game_or_error(socket, new_game)
 
       {:error, _reason} ->
-        put_flash(socket, :error, "Fehler beim Erstellen des neuen Spiels.")
+        put_flash(socket, :error, gettext("Fehler beim Erstellen des neuen Spiels."))
     end
   end
 
@@ -549,7 +553,7 @@ defmodule MimimiWeb.DashboardLive.Show do
         redirect(socket, to: ~p"/game/#{started_game.id}/set-host-token")
 
       {:error, _reason} ->
-        put_flash(socket, :error, "Fehler beim Starten des neuen Spiels.")
+        put_flash(socket, :error, gettext("Fehler beim Starten des neuen Spiels."))
     end
   end
 
@@ -639,7 +643,7 @@ defmodule MimimiWeb.DashboardLive.Show do
     ~H"""
     <.glass_card class="p-6 mb-6">
       <h2 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white text-center">
-        Einladungscode
+        {gettext("Einladungscode")}
       </h2>
 
       <%!-- Large prominent code display --%>
@@ -651,7 +655,7 @@ defmodule MimimiWeb.DashboardLive.Show do
             {@short_code}
           </div>
           <p class="text-sm text-gray-600 dark:text-gray-400 font-medium">
-            Gib diesen Code ein auf
+            {gettext("Gib diesen Code ein auf")}
             <span class="font-bold text-purple-600 dark:text-purple-400">
               {URI.parse(@invitation_url).host}
             </span>
@@ -679,8 +683,8 @@ defmodule MimimiWeb.DashboardLive.Show do
             }
             size="md"
           >
-            <span id="copy-text">Link kopieren</span>
-            <span id="copied-text" class="hidden opacity-0">Kopiert! ✓</span>
+            <span id="copy-text">{gettext("Link kopieren")}</span>
+            <span id="copied-text" class="hidden opacity-0">{gettext("Kopiert!")} ✓</span>
           </.gradient_button>
         </div>
 
@@ -714,7 +718,7 @@ defmodule MimimiWeb.DashboardLive.Show do
           <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700">
           </div>
         <% end %>
-        <span class="relative">Jetzt spielen!</span>
+        <span class="relative">{gettext("Jetzt spielen!")}</span>
       </button>
     </div>
     """
@@ -724,10 +728,10 @@ defmodule MimimiWeb.DashboardLive.Show do
     ~H"""
     <.glass_card class="p-6">
       <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-        Mitspieler ({length(@players)})
+        {gettext("Mitspieler (%{count})", count: length(@players))}
         <%= if MapSet.size(@pending_players) > 0 do %>
           <span class="text-sm font-normal text-purple-600 dark:text-purple-400">
-            + {MapSet.size(@pending_players)} wählt Avatar...
+            {gettext("+ %{count} wählt Avatar...", count: MapSet.size(@pending_players))}
           </span>
         <% end %>
       </h2>
@@ -735,7 +739,7 @@ defmodule MimimiWeb.DashboardLive.Show do
       <%= if @players == [] && MapSet.size(@pending_players) == 0 do %>
         <div class="text-center py-8">
           <div class="text-6xl mb-4 opacity-50">👥</div>
-          <p class="text-gray-600 dark:text-gray-400">Warte auf Spieler...</p>
+          <p class="text-gray-600 dark:text-gray-400">{gettext("Warte auf Spieler...")}</p>
         </div>
       <% else %>
         <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
@@ -769,7 +773,7 @@ defmodule MimimiWeb.DashboardLive.Show do
             <div class="relative flex flex-col items-center justify-center p-3 border-2 border-dashed border-purple-400 dark:border-purple-500 rounded-2xl bg-purple-50/50 dark:bg-purple-900/20 backdrop-blur-sm animate-pulse aspect-square">
               <span class="text-6xl sm:text-7xl mb-1">❓</span>
               <span class="text-xs text-center text-purple-600 dark:text-purple-400 font-medium leading-tight">
-                Wählt...
+                {gettext("Wählt...")}
               </span>
             </div>
           <% end %>
@@ -789,7 +793,7 @@ defmodule MimimiWeb.DashboardLive.Show do
       >
         <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700">
         </div>
-        <span class="relative">🚫 Spiel abbrechen</span>
+        <span class="relative">🚫 {gettext("Spiel abbrechen")}</span>
       </button>
     </div>
     """
@@ -833,15 +837,18 @@ defmodule MimimiWeb.DashboardLive.Show do
     ~H"""
     <div class="text-center mb-8">
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-        Runde {@current_round.position} von {@game.rounds_count}
+        {gettext("Runde %{position} von %{total}",
+          position: @current_round.position,
+          total: @game.rounds_count
+        )}
       </h1>
       <p class="text-lg text-gray-600 dark:text-gray-400 mb-4">
-        Lehrkraft Dashboard
+        {gettext("Lehrkraft Dashboard")}
       </p>
       <%!-- Toggle for showing/hiding guess markers --%>
       <div class="inline-flex items-center gap-3 px-4 py-2 bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-gray-700/50">
         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-          Antworten anzeigen
+          {gettext("Antworten anzeigen")}
         </span>
         <button
           type="button"
@@ -871,7 +878,7 @@ defmodule MimimiWeb.DashboardLive.Show do
     ~H"""
     <.glass_card class="p-8">
       <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-        Schlüsselwörter
+        {gettext("Schlüsselwörter")}
       </h2>
       <div class="flex flex-wrap gap-3">
         <%= for {keyword, index} <- Enum.with_index(@keywords, 1) do %>
@@ -893,7 +900,7 @@ defmodule MimimiWeb.DashboardLive.Show do
     ~H"""
     <.glass_card class="p-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        Bilder zur Auswahl
+        {gettext("Bilder zur Auswahl")}
       </h3>
       <% word_picks = calculate_word_picks(@round_analytics) %>
       <div class="grid grid-cols-3 gap-3">
@@ -946,7 +953,7 @@ defmodule MimimiWeb.DashboardLive.Show do
     ~H"""
     <.glass_card class="p-8">
       <h2 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white">
-        Spieler Auswahl
+        {gettext("Spieler Auswahl")}
       </h2>
 
       <div class="grid grid-cols-1 gap-4">
@@ -1001,7 +1008,12 @@ defmodule MimimiWeb.DashboardLive.Show do
                       <bdi lang={@game.language_iso} dir="auto">{player_pick.picked_word.name}</bdi>
                     </p>
                     <p class="text-xs text-gray-600 dark:text-gray-400">
-                      {player_pick.keywords_shown} Hinweise • {player_pick.time}s
+                      {ngettext(
+                        "%{count} Hinweis • %{time}s",
+                        "%{count} Hinweise • %{time}s",
+                        player_pick.keywords_shown,
+                        time: player_pick.time
+                      )}
                     </p>
                   </div>
                 </div>
@@ -1015,7 +1027,7 @@ defmodule MimimiWeb.DashboardLive.Show do
               <span class="text-5xl opacity-50">{player.avatar}</span>
               <div class="flex-1">
                 <p class="text-gray-500 dark:text-gray-400 font-medium">
-                  Wartet auf Antwort...
+                  {gettext("Wartet auf Antwort...")}
                 </p>
               </div>
             </div>
@@ -1030,7 +1042,7 @@ defmodule MimimiWeb.DashboardLive.Show do
     ~H"""
     <.glass_card class="p-8">
       <h2 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white">
-        Aktuelle Rangliste
+        {gettext("Aktuelle Rangliste")}
       </h2>
 
       <div class="space-y-2">
@@ -1053,7 +1065,7 @@ defmodule MimimiWeb.DashboardLive.Show do
                   else: "text-gray-900 dark:text-white"
                 )
               ]}>
-                {player.points} Punkte
+                {ngettext("%{count} Punkt", "%{count} Punkte", player.points)}
               </span>
             </div>
           </div>
@@ -1068,13 +1080,13 @@ defmodule MimimiWeb.DashboardLive.Show do
     <%= if @game_stats.played_rounds > 0 do %>
       <.glass_card class="p-8 mt-6">
         <h2 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white">
-          Bisherige Leistung
+          {gettext("Bisherige Leistung")}
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl p-4">
             <p class="text-sm text-blue-600 dark:text-blue-400 mb-1 font-medium">
-              Gespielte Runden
+              {gettext("Gespielte Runden")}
             </p>
             <p class="text-2xl font-bold text-blue-900 dark:text-blue-100">
               {@game_stats.played_rounds} / {@game_stats.total_rounds}
@@ -1083,7 +1095,7 @@ defmodule MimimiWeb.DashboardLive.Show do
 
           <div class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-xl p-4">
             <p class="text-sm text-green-600 dark:text-green-400 mb-1 font-medium">
-              Gesamt Genauigkeit
+              {gettext("Gesamt Genauigkeit")}
             </p>
             <p class="text-2xl font-bold text-green-900 dark:text-green-100">
               {@game_stats.average_accuracy}%
@@ -1092,7 +1104,7 @@ defmodule MimimiWeb.DashboardLive.Show do
 
           <div class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 rounded-xl p-4">
             <p class="text-sm text-purple-600 dark:text-purple-400 mb-1 font-medium">
-              Richtig / Falsch
+              {gettext("Richtig / Falsch")}
             </p>
             <p class="text-2xl font-bold text-purple-900 dark:text-purple-100">
               {@game_stats.total_correct} / {@game_stats.total_wrong}
@@ -1102,7 +1114,7 @@ defmodule MimimiWeb.DashboardLive.Show do
 
         <%!-- Per-player statistics --%>
         <h3 class="text-md font-semibold mb-4 text-gray-900 dark:text-white">
-          Spieler Statistiken
+          {gettext("Spieler Statistiken")}
         </h3>
         <div class="space-y-2">
           <%= for stat <- @game_stats.player_stats do %>
@@ -1112,19 +1124,22 @@ defmodule MimimiWeb.DashboardLive.Show do
                   <span class="text-3xl">{stat.player.avatar}</span>
                   <div>
                     <p class="font-semibold text-gray-900 dark:text-white">
-                      Genauigkeit: {stat.accuracy}%
+                      {gettext("Genauigkeit: %{accuracy}%", accuracy: stat.accuracy)}
                     </p>
                     <p class="text-sm text-gray-600 dark:text-gray-400">
-                      {stat.correct} richtig, {stat.wrong} falsch
+                      {gettext("%{correct} richtig, %{wrong} falsch",
+                        correct: stat.correct,
+                        wrong: stat.wrong
+                      )}
                     </p>
                   </div>
                 </div>
                 <div class="text-right">
                   <p class="text-lg font-bold text-purple-600 dark:text-purple-400">
-                    {stat.points} Punkte
+                    {ngettext("%{count} Punkt", "%{count} Punkte", stat.points)}
                   </p>
                   <p class="text-xs text-gray-500 dark:text-gray-400">
-                    ⌀ {stat.average_keywords_used} Hinweise
+                    ⌀ {gettext("%{count} Hinweise", count: stat.average_keywords_used)}
                   </p>
                 </div>
               </div>
@@ -1142,7 +1157,7 @@ defmodule MimimiWeb.DashboardLive.Show do
     ~H"""
     <.glass_card class="p-8">
       <h2 class="text-lg font-semibold mb-6 text-gray-900 dark:text-white">
-        Aktuelle Rangliste
+        {gettext("Aktuelle Rangliste")}
       </h2>
 
       <div class="space-y-2">
@@ -1165,7 +1180,7 @@ defmodule MimimiWeb.DashboardLive.Show do
                   else: "text-gray-900 dark:text-white"
                 )
               ]}>
-                {player.points} Punkte
+                {ngettext("%{count} Punkt", "%{count} Punkte", player.points)}
               </span>
             </div>
           </div>
@@ -1185,7 +1200,7 @@ defmodule MimimiWeb.DashboardLive.Show do
         shadow_color="shadow-red-500/30"
         hover_shadow_color="shadow-red-500/40"
       >
-        ⏹️ Spiel jetzt beenden
+        ⏹️ {gettext("Spiel jetzt beenden")}
       </.gradient_button>
     </div>
     """
@@ -1205,10 +1220,10 @@ defmodule MimimiWeb.DashboardLive.Show do
         <div class="text-center mb-6">
           <.gradient_icon_badge icon="⚠️" gradient="from-red-500 to-orange-500" />
           <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Spiel wirklich beenden?
+            {gettext("Spiel wirklich beenden?")}
           </h2>
           <p class="text-gray-600 dark:text-gray-400">
-            Das Spiel wird sofort beendet und alle Spieler sehen die finale Rangliste.
+            {gettext("Das Spiel wird sofort beendet und alle Spieler sehen die finale Rangliste.")}
           </p>
         </div>
 
@@ -1218,7 +1233,7 @@ defmodule MimimiWeb.DashboardLive.Show do
             phx-click={JS.hide(to: "#stop-game-modal")}
             class="relative py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-white rounded-xl font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
           >
-            Abbrechen
+            {gettext("Abbrechen")}
           </button>
           <.gradient_button
             phx-click={JS.push("stop_game") |> JS.hide(to: "#stop-game-modal")}
@@ -1229,7 +1244,7 @@ defmodule MimimiWeb.DashboardLive.Show do
             size="sm"
             class="py-3"
           >
-            Ja, beenden
+            {gettext("Ja, beenden")}
           </.gradient_button>
         </div>
       </div>
@@ -1241,10 +1256,10 @@ defmodule MimimiWeb.DashboardLive.Show do
     ~H"""
     <div class="text-center mb-10">
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-        Spielleiter Dashboard
+        {gettext("Spielleiter Dashboard")}
       </h1>
       <p class="text-lg text-gray-600 dark:text-gray-400">
-        Spiel wird vorbereitet...
+        {gettext("Spiel wird vorbereitet...")}
       </p>
     </div>
 
@@ -1252,10 +1267,10 @@ defmodule MimimiWeb.DashboardLive.Show do
       <div class="text-center py-8">
         <.spinner class="mb-4" />
         <p class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Runden werden generiert...
+          {gettext("Runden werden generiert...")}
         </p>
         <p class="text-sm text-gray-600 dark:text-gray-400">
-          Bitte warten Sie einen Moment
+          {gettext("Bitte warten Sie einen Moment")}
         </p>
       </div>
     </.glass_card>
@@ -1299,10 +1314,10 @@ defmodule MimimiWeb.DashboardLive.Show do
     ~H"""
     <div class="text-center mb-10">
       <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-        Spiel fertig!
+        {gettext("Spiel fertig!")}
       </h1>
       <p class="text-gray-500 dark:text-gray-400">
-        Wer hat gewonnen?
+        {gettext("Wer hat gewonnen?")}
       </p>
     </div>
     """
@@ -1371,7 +1386,7 @@ defmodule MimimiWeb.DashboardLive.Show do
                 <% end %>
               </div>
               <span class="relative text-xl font-bold">
-                {hd(players_at_rank).points} Punkte
+                {ngettext("%{count} Punkt", "%{count} Punkte", hd(players_at_rank).points)}
               </span>
             </div>
             <%= if rank < 4 do %>
@@ -1390,7 +1405,7 @@ defmodule MimimiWeb.DashboardLive.Show do
     <%= if @correct_picks_by_player && map_size(@correct_picks_by_player) > 0 do %>
       <.glass_card class="p-8 mb-6 correct-picks">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
-          Super! 🎉
+          {gettext("Super!")} 🎉
         </h2>
 
         <div class="space-y-8">
@@ -1403,12 +1418,18 @@ defmodule MimimiWeb.DashboardLive.Show do
                   <span class="text-5xl">{player.avatar}</span>
                   <div>
                     <p class="font-bold text-lg text-gray-900 dark:text-white">
-                      {length(correct_words)} {if length(correct_words) == 1,
-                        do: "Wort",
-                        else: "Wörter"} richtig
+                      {ngettext(
+                        "%{count} Wort richtig",
+                        "%{count} Wörter richtig",
+                        length(correct_words)
+                      )}
                     </p>
                     <p class="text-sm text-gray-600 dark:text-gray-400">
-                      {player.points} {if player.points == 1, do: "Punkt", else: "Punkte"} gesammelt
+                      {ngettext(
+                        "%{count} Punkt gesammelt",
+                        "%{count} Punkte gesammelt",
+                        player.points
+                      )}
                     </p>
                   </div>
                 </div>
@@ -1464,15 +1485,17 @@ defmodule MimimiWeb.DashboardLive.Show do
           hover_shadow_color="shadow-green-500/40"
           size="lg"
         >
-          🔄 Neues Spiel mit denselben Spielern
+          🔄 {gettext("Neues Spiel mit denselben Spielern")}
         </.gradient_button>
         <%= if all_players_online?(@players, @online_player_ids) do %>
           <p class="text-xs text-center text-green-600 dark:text-green-400 mt-2 font-medium">
-            ✓ Alle Spieler sind noch online
+            ✓ {gettext("Alle Spieler sind noch online")}
           </p>
         <% else %>
           <p class="text-xs text-center text-orange-600 dark:text-orange-400 mt-2 font-medium">
-            ⚠ Nicht alle Spieler sind noch online. Es werden nur die online Spieler mitgenommen.
+            ⚠ {gettext(
+              "Nicht alle Spieler sind noch online. Es werden nur die online Spieler mitgenommen."
+            )}
           </p>
         <% end %>
       </div>
@@ -1486,7 +1509,7 @@ defmodule MimimiWeb.DashboardLive.Show do
       href="/game/leave"
       class="block w-full text-center text-lg font-semibold py-4 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 hover:from-purple-700 hover:via-purple-600 hover:to-pink-600 text-white rounded-2xl shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
     >
-      Zurück zur Startseite
+      {gettext("Zurück zur Startseite")}
     </a>
     """
   end
