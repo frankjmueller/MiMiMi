@@ -301,7 +301,13 @@ defmodule MimimiWeb.HomeLive.Index do
         phx-submit="save"
         class="space-y-7"
       >
-        <.render_language_selector :if={length(@languages) > 1} form={@form} languages={@languages} />
+        <%= if length(@languages) > 1 do %>
+          <.render_language_selector form={@form} languages={@languages} />
+        <% else %>
+          <%!-- One (or no) playable language: no picker, but still submit the resolved language so a
+                single non-German language is not silently replaced by the "deu" fallback. --%>
+          <input type="hidden" name="game[language_iso]" value={@form[:language_iso].value} />
+        <% end %>
         <.render_rounds_and_time_inputs form={@form} />
         <.render_word_types_selector form={@form} />
         <.render_grid_size_selector form={@form} />

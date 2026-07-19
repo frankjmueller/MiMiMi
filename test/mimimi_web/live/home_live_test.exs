@@ -4,6 +4,7 @@ defmodule MimimiWeb.HomeLiveTest do
   import Phoenix.LiveViewTest
 
   alias Mimimi.{Accounts, Games}
+  alias Mimimi.OurwordsFixtures
 
   setup %{conn: conn} do
     {:ok, user} = Accounts.get_or_create_user_by_session("test_session_id")
@@ -253,6 +254,22 @@ defmodule MimimiWeb.HomeLiveTest do
       assert "Noun" in game.word_types
       assert "Verb" in game.word_types
       assert "Adjective" in game.word_types
+    end
+
+    # When exactly one language is playable and it is NOT German, the picker is hidden but the form must
+    # still carry that language — otherwise it would silently fall back to the "deu" default (ADR 0075).
+    test "a single non-German playable language is submitted, not replaced by the deu default", %{
+      conn: conn
+    } do
+      OurwordsFixtures.insert_language("eng", autonym: "English")
+      OurwordsFixtures.insert_word(id: 5001, language_iso: "eng", name: "sheep", type: "Noun")
+      OurwordsFixtures.insert_keywords(5001, "eng", ["wool"])
+
+      {:ok, view, html} = live(conn, "/")
+
+      # No visible language <select> (only one language), but a hidden field carrying "eng".
+      refute html =~ ~s(name="game[language_iso]"><)
+      assert has_element?(view, ~s(input[type="hidden"][name="game[language_iso]"][value="eng"]))
     end
   end
 end
