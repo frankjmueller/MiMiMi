@@ -178,6 +178,7 @@ defmodule Mimimi.WortSchule do
     %{
       id: word.id,
       name: word.name,
+      language_iso: word.language_iso,
       keywords: Enum.map(word.keywords, &%{id: &1.keyword_id, name: &1.name}),
       image_url: absolute_image_url(word.image_url)
     }

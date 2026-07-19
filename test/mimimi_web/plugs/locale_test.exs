@@ -36,6 +36,26 @@ defmodule MimimiWeb.Plugs.LocaleTest do
     assert conn.assigns.ui_locale == "en"
   end
 
+  test "respects Accept-Language q-values, not header order" do
+    conn =
+      build_conn()
+      |> Plug.Test.init_test_session(%{})
+      |> Plug.Conn.put_req_header("accept-language", "de;q=0.1,en;q=1.0")
+      |> run()
+
+    assert conn.assigns.ui_locale == "en"
+  end
+
+  test "never selects a q=0 language" do
+    conn =
+      build_conn()
+      |> Plug.Test.init_test_session(%{})
+      |> Plug.Conn.put_req_header("accept-language", "en;q=0,de;q=0.5")
+      |> run()
+
+    assert conn.assigns.ui_locale == "de"
+  end
+
   test "ignores an unsupported locale and uses the default" do
     conn =
       build_conn()

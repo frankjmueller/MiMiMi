@@ -17,7 +17,9 @@ defmodule MimimiWeb.LocaleController do
     redirect(conn, to: safe_return_to(params["return_to"]))
   end
 
-  # Only same-site relative paths are honoured — never an attacker-supplied absolute URL (open redirect).
+  # Only same-site relative paths are honoured — never an attacker-supplied absolute or protocol-relative
+  # URL (open redirect). A path starting with "//" is protocol-relative (//evil.example) and rejected.
+  defp safe_return_to("//" <> _), do: "/"
   defp safe_return_to("/" <> _ = path), do: path
   defp safe_return_to(_), do: "/"
 end

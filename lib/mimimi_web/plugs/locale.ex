@@ -43,7 +43,8 @@ defmodule MimimiWeb.Plugs.Locale do
     end
   end
 
-  # Parse Accept-Language and return the first supported language tag's base (en-US → en).
+  # Parse Accept-Language honouring q-values: sort tags by descending quality (default q=1.0), drop q<=0,
+  # then take the first supported base tag (en-US → en). So "de;q=0.1,en;q=1.0" resolves to "en".
   defp accept_language_locale(conn) do
     conn
     |> get_req_header("accept-language")
@@ -55,9 +56,34 @@ defmodule MimimiWeb.Plugs.Locale do
       header ->
         header
         |> String.split(",")
-        |> Enum.map(fn part -> part |> String.split(";") |> hd() |> String.trim() end)
-        |> Enum.map(fn tag -> tag |> String.split("-") |> hd() |> String.downcase() end)
-        |> Enum.find_value(&supported/1)
+        |> Enum.map(&parse_language_range/1)
+        |> Enum.reject(fn {_base, q} -> q <= 0.0 end)
+        |> Enum.sort_by(fn {_base, q} -> q end, :desc)
+        |> Enum.find_value(fn {base, _q} -> supported(base) end)
+    end
+  end
+
+  # "en-US;q=0.8" → {"en", 0.8}; a missing q defaults to 1.0, an unparseable q to 0.0 (dropped).
+  defp parse_language_range(part) do
+    [tag | params] = part |> String.trim() |> String.split(";")
+    base = tag |> String.trim() |> String.split("-") |> hd() |> String.downcase()
+
+    q =
+      params
+      |> Enum.find_value(1.0, fn param ->
+        case param |> String.trim() |> String.split("=") do
+          ["q", value] -> parse_q(value)
+          _ -> nil
+        end
+      end)
+
+    {base, q}
+  end
+
+  defp parse_q(value) do
+    case Float.parse(String.trim(value)) do
+      {q, _rest} -> q
+      :error -> 0.0
     end
   end
 

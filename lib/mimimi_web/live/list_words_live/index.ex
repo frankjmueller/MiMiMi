@@ -227,8 +227,10 @@ defmodule MimimiWeb.ListWordsLive.Index do
               />
             </div>
 
+            <%!-- Lemma + keywords verbatim + bidi-aware (HR2); the list spans languages, so lang is
+                  per-word. --%>
             <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 text-center">
-              {word.name}
+              <bdi lang={word.language_iso} dir="auto">{word.name}</bdi>
             </h2>
 
             <div class="space-y-2">
@@ -240,7 +242,7 @@ defmodule MimimiWeb.ListWordsLive.Index do
                   :for={keyword <- word.keywords}
                   class="inline-block px-3 py-1.5 bg-gradient-to-r from-purple-500/10 to-pink-500/10 dark:from-purple-500/20 dark:to-pink-500/20 border border-purple-200 dark:border-purple-700 rounded-full text-sm font-medium text-purple-700 dark:text-purple-300"
                 >
-                  {keyword.name}
+                  <bdi lang={word.language_iso} dir="auto">{keyword.name}</bdi>
                 </span>
               </div>
             </div>

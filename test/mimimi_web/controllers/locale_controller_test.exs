@@ -22,6 +22,11 @@ defmodule MimimiWeb.LocaleControllerTest do
     assert redirected_to(conn) == "/"
   end
 
+  test "rejects a protocol-relative return_to (//host)", %{conn: conn} do
+    conn = get(conn, ~p"/locale/en", return_to: "//evil.example/phish")
+    assert redirected_to(conn) == "/"
+  end
+
   test "honours a same-site relative return_to", %{conn: conn} do
     conn = get(conn, ~p"/locale/de", return_to: "/list_words")
     assert redirected_to(conn) == "/list_words"
